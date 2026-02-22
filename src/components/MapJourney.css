@@ -1,0 +1,173 @@
+.journey-root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* ── Map ─────────────────────────────────────────── */
+.map-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Hide all default maplibre controls */
+.maplibregl-ctrl,
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl-bottom-right,
+.maplibregl-ctrl-top-left,
+.maplibregl-ctrl-top-right {
+  display: none !important;
+}
+
+/* ── Header ──────────────────────────────────────── */
+.journey-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(to bottom, rgba(11,15,20,0.75) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.journey-heading {
+  font-family: var(--font-display);
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  gap: 0.1em;
+}
+
+.journey-heading-kuril {
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  font-weight: 700;
+  color: var(--color-accent);
+  letter-spacing: 0.02em;
+}
+
+.journey-heading-geo {
+  font-size: clamp(0.65rem, 1.4vw, 0.9rem);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+/* ── POI Panel ───────────────────────────────────── */
+.poi-panel {
+  position: absolute;
+  top: 50%;
+  right: 2rem;
+  transform: translateY(-50%) translateX(30px);
+  z-index: 10;
+  width: min(320px, calc(100vw - 4rem));
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 1.5rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.poi-panel--visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
+}
+
+.poi-panel-label {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--color-point);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
+  line-height: 1.1;
+}
+
+.poi-panel-description {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--color-text);
+  font-weight: 300;
+  margin-bottom: 1rem;
+}
+
+.poi-panel-km {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ── Scroll overlay ──────────────────────────────── */
+.scroll-overlay {
+  position: absolute;
+  inset: 0;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  z-index: 5;
+  /* Let mouse events pass through to map for visual feedback,
+     but capture scroll */
+  pointer-events: auto;
+  /* Make the div itself transparent */
+  scrollbar-width: none;
+}
+
+.scroll-overlay::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-content {
+  width: 100%;
+  /* height is set inline */
+}
+
+/* ── Scroll hint ─────────────────────────────────── */
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: hint-pulse 2.5s ease-in-out infinite;
+}
+
+.scroll-hint svg {
+  width: 18px;
+  height: 18px;
+  color: var(--color-accent);
+}
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.5; transform: translateX(-50%) translateY(0); }
+  50%       { opacity: 1;   transform: translateX(-50%) translateY(4px); }
+}
+
+.scroll-hint--hidden {
+  opacity: 0 !important;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
