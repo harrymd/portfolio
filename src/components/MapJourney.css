@@ -57,12 +57,12 @@
   text-transform: uppercase;
 }
 
-/* ── POI Panel ───────────────────────────────────── */
+/* ── POI Panel — desktop (right-centre) ──────────── */
 .poi-panel {
   position: absolute;
   top: 50%;
   right: 2rem;
-  transform: translateY(-50%) translateX(30px);
+  transform: translateY(-50%) translateX(20px);
   z-index: 10;
   width: min(320px, calc(100vw - 4rem));
   background: var(--color-surface);
@@ -74,7 +74,9 @@
 
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition:
+    opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .poi-panel--visible {
@@ -83,33 +85,76 @@
   transform: translateY(-50%) translateX(0);
 }
 
+/* ── POI Panel — mobile (bottom-centre) ─────────── */
+@media (max-width: 767px) {
+  .poi-panel {
+    top: auto;
+    right: auto;
+    bottom: 4rem;          /* above attribution + some breathing room */
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    width: min(360px, calc(100vw - 2rem));
+    max-height: 42vh;
+    overflow-y: auto;
+  }
+
+  .poi-panel--visible {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ── Panel sections ──────────────────────────────── */
+.poi-panel-section {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Subsection detail: fades independently ──────── */
+.poi-panel-detail {
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.poi-panel-detail--visible {
+  opacity: 1;
+}
+
 .poi-panel-label {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 600;
   color: var(--color-point);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   margin-bottom: 0.75rem;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 .poi-panel-description {
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   line-height: 1.65;
   color: var(--color-text);
   font-weight: 300;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
 
-.poi-panel-km {
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--color-border);
+.poi-panel-description a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.poi-panel-image {
+  width: 100%;
+  border-radius: 3px;
+  display: block;
+  margin-top: 0.5rem;
+  opacity: 0.9;
 }
 
 /* ── Scroll overlay ──────────────────────────────── */
@@ -119,10 +164,7 @@
   overflow-y: scroll;
   overflow-x: hidden;
   z-index: 5;
-  /* Let mouse events pass through to map for visual feedback,
-     but capture scroll */
   pointer-events: auto;
-  /* Make the div itself transparent */
   scrollbar-width: none;
 }
 
@@ -132,7 +174,6 @@
 
 .scroll-content {
   width: 100%;
-  /* height is set inline */
 }
 
 /* ── Scroll hint ─────────────────────────────────── */

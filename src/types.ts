@@ -1,22 +1,36 @@
 import type { Feature, LineString, FeatureCollection } from 'geojson'
 
-export interface LabelledPointProps {
-  fid: number
+export interface NarrativeSubsection {
+  number: number
   name: string
-  description: string
+  text: string
+  image: string | null
+}
+
+export interface NarrativeSection {
+  number: number
+  name: string
+  subsections: NarrativeSubsection[]
+}
+
+export interface NarrativeData {
+  sections: NarrativeSection[]
 }
 
 export interface SnappedPoint {
-  props: LabelledPointProps
-  snappedCoord: [number, number] // [lng, lat]
-  distanceAlongPath: number // km from start
+  narrativeId: number           // the 'id' from labelled_points.geojson
+  sectionName: string           // parent section name from narrative
+  subsectionName: string        // subsection name from narrative
+  text: string                  // subsection body text (may contain HTML)
+  image: string | null          // filename in /gallery/, or null
+  snappedCoord: [number, number]
+  distanceAlongPath: number     // km from start
 }
 
 export interface LoadedData {
   pathFeature: Feature<LineString>
   pathGeoJSON: FeatureCollection
-  labelledPointsGeoJSON: FeatureCollection
   snappedPoints: SnappedPoint[]
-  totalDistance: number // km
+  totalDistance: number
   style: object
 }
