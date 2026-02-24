@@ -1,11 +1,15 @@
 import { useState } from 'react'
 import './AttributionWidget.css'
 
-export default function AttributionWidget() {
+interface Props {
+  hidden?: boolean
+}
+
+export default function AttributionWidget({ hidden = false }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="attr-widget">
+    <div className={`attr-widget${hidden ? ' attr-widget--hidden' : ''}`}>
       <button
         className={`attr-toggle ${open ? 'attr-toggle--open' : ''}`}
         onClick={() => setOpen((v) => !v)}
@@ -17,7 +21,7 @@ export default function AttributionWidget() {
           <line x1="12" y1="11" x2="12" y2="16" />
           <circle cx="12" cy="8" r="0.5" fill="currentColor" strokeWidth="1" />
         </svg>
-        <span>map info</span>
+        <span>map attributions</span>
       </button>
 
       <div className={`attr-panel ${open ? 'attr-panel--open' : ''}`} role="region" aria-label="Map credits">

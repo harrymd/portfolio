@@ -10,13 +10,13 @@
 
   --color-bg: #0b0f14;
   --color-surface: rgba(11, 15, 20, 0.85);
-  --color-accent: #7dd3fc;
-  --color-accent-dim: rgba(125, 211, 252, 0.15);
+  --color-accent: #e03030;
+  --color-accent-dim: rgba(224, 48, 48, 0.15);
   --color-text: #e2e8f0;
   --color-text-muted: #94a3b8;
-  --color-path: #38bdf8;
-  --color-point: #f0abfc;
-  --color-border: rgba(125, 211, 252, 0.2);
+  --color-path: #e03030;
+  --color-point: #f05a5a;
+  --color-border: rgba(224, 48, 48, 0.25);
 
   font-family: var(--font-body);
   font-size: 16px;

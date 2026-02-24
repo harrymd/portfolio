@@ -1,0 +1,102 @@
+.gallery-section {
+  background: #0b0f14;
+  min-height: 100vh;
+  padding: 5rem 2.5rem 6rem;
+  pointer-events: auto;
+}
+
+.gallery-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.gallery-heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  color: var(--color-accent);
+  margin-bottom: 3rem;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1rem;
+}
+
+/* ── Two-column masonry flow ─────────────────────────── */
+.gallery-grid {
+  column-count: 2;
+  column-gap: 2.5rem;
+}
+
+@media (max-width: 767px) {
+  .gallery-grid {
+    column-count: 1;
+  }
+}
+
+/* ── Cards ───────────────────────────────────────────── */
+.gallery-card {
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+
+.gallery-card-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.75rem;
+  line-height: 1.25;
+}
+
+.gallery-card-desc {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+}
+
+.gallery-card-desc a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.gallery-card-desc a:hover {
+  opacity: 0.8;
+}
+
+/* ── Tool pills ──────────────────────────────────────── */
+.gallery-card-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.gallery-pill {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  padding: 0.2rem 0.65rem;
+  background: var(--color-accent-dim);
+  border: 1px solid var(--color-border);
+  border-radius: 100px;
+  color: var(--color-accent);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ── Image ───────────────────────────────────────────── */
+.gallery-card-img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+  opacity: 0.92;
+}
