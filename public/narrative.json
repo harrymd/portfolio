@@ -8,7 +8,7 @@
         {
           "number": 1,
           "name": "Interactive maps?",
-          "text": "Make your project browsable, navigable, and exciting! Visualise relationships, notice patterns, or share information. Make use of the wealth of public information on OpenStreetMap and other sources",
+          "text": "Make your project browsable, navigable, and exciting! Visualise relationships, notice patterns, or share information. Make use of the wealth of public information on OpenStreetMap and other sources.",
           "image": null
         },
         {
@@ -50,7 +50,7 @@
         },
         {
           "number": 7,
-          "name": "Hydrogen exploration",
+          "name": "Hydrogen explorers",
           "text": "(For confidentiality reasons, no specific details are given.) In a soil-gas survey, I planned survey locations, collected field data, coordinated teams, and plotted results, to determine the prospectivity of a target region.",
           "image": "hydrogen.png"
         },
@@ -64,7 +64,7 @@
     },
     {
       "number": 3,
-      "name": "My other experience",
+      "name": "My skills",
       "contents-name": "My CV",
       "subsections": [
         {
@@ -112,7 +112,7 @@
         },
         {
           "number": 15,
-          "name": "Efficient",
+          "name": "Efficiency",
           "text": "We'll agree a timeframe, and I can get things done fast!",
           "image": null
         },

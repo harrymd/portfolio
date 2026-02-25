@@ -5,7 +5,7 @@ import './ProgressBar.css'
 // Duration (ms) per section crossed when clicking a contents item.
 // Total scroll time = CLICK_SCROLL_MS × |target section − current section|.
 // Increase this value to slow down navigation further.
-const CLICK_SCROLL_MS = 5000
+const CLICK_SCROLL_MS = 3000
 
 export interface ProgressBarItem {
   id: string

@@ -3,7 +3,7 @@
 "name": "labelled_points",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
-{ "type": "Feature", "properties": { "fid": 1, "id": 0 }, "geometry": { "type": "Point", "coordinates": [ 10.605903819804142, 67.016622762954128 ] } },
+{ "type": "Feature", "properties": { "fid": 1, "id": 0 }, "geometry": { "type": "Point", "coordinates": [ 12.482171590612875, 67.711212716110055 ] } },
 { "type": "Feature", "properties": { "fid": 2, "id": 1 }, "geometry": { "type": "Point", "coordinates": [ 13.840409404830185, 68.120879055126139 ] } },
 { "type": "Feature", "properties": { "fid": 3, "id": 2 }, "geometry": { "type": "Point", "coordinates": [ 14.566712449194535, 68.230719207978737 ] } },
 { "type": "Feature", "properties": { "fid": 4, "id": 3 }, "geometry": { "type": "Point", "coordinates": [ 14.911719638934917, 68.571078141369199 ] } },
