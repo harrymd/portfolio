@@ -70,15 +70,58 @@ export default function GallerySection() {
         </div>
 
         {/* ── Pricing ────────────────────────────────────── */}
-        <div className="gallery-extra-section">
+        <div id="gallery-pricing" className="gallery-extra-section">
           <h2 className="gallery-heading">Pricing</h2>
-          <p className="gallery-filler-text">the pricing section</p>
+          <p className="gallery-filler-text">
+            The project cost is agreed upon before work starts. Please expect to pay a 25%
+            deposit at the beginning.
+          </p>
+
+          <p className="gallery-subheading">Discounts for longer projects</p>
+          <div className="gallery-table-wrap">
+            <table className="gallery-table">
+              <thead>
+                <tr><th>Project length</th><th>Discount</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>1 week</td><td>5%</td></tr>
+                <tr><td>2 weeks</td><td>10%</td></tr>
+                <tr><td>4 weeks</td><td>15%</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="gallery-subheading">Rates</p>
+          <div className="gallery-table-wrap">
+            <table className="gallery-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Charity&nbsp;/ Non-profit&nbsp;/ Academic</th>
+                  <th>Industry</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Daily rate</td><td>£300</td><td>£500</td></tr>
+                <tr><td>Hourly rate</td><td>£50</td><td>£80</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="gallery-filler-text">
+            Prices in GBP (or local equivalent for US, EU, or other customers).
+            Invoices provided.
+          </p>
         </div>
 
         {/* ── Contact ────────────────────────────────────── */}
-        <div className="gallery-extra-section">
+        <div id="gallery-contact" className="gallery-extra-section">
           <h2 className="gallery-heading">Contact</h2>
-          <p className="gallery-filler-text">This is the contact section</p>
+          <p className="gallery-filler-text">
+            If my skills are a good fit for your project, please contact me at{' '}
+            <a href="mailto:projects@HKuril.com">projects@HKuril.com</a>.
+            {' '}We can have a no-obligation discussion by call or email.
+          </p>
         </div>
 
       </div>

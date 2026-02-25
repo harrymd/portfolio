@@ -125,4 +125,66 @@
   font-size: 1rem;
   line-height: 1.7;
   color: #475569;
+  margin-bottom: 1rem;
+}
+
+.gallery-filler-text a {
+  color: #c01818;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.gallery-filler-text a:hover {
+  opacity: 0.75;
+}
+
+/* ── Sub-headings inside extra sections ─────────── */
+.gallery-subheading {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #c01818;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Tables ──────────────────────────────────────── */
+.gallery-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 0.5rem;
+}
+
+.gallery-table {
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  min-width: 320px;
+}
+
+.gallery-table th {
+  text-align: left;
+  font-weight: 600;
+  color: #1e293b;
+  padding: 0.45rem 1.25rem 0.45rem 0;
+  border-bottom: 2px solid rgba(192, 24, 24, 0.2);
+  white-space: nowrap;
+}
+
+.gallery-table td {
+  padding: 0.45rem 1.25rem 0.45rem 0;
+  color: #374151;
+  border-bottom: 1px solid rgba(180, 190, 210, 0.4);
+}
+
+.gallery-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.gallery-table td:first-child,
+.gallery-table th:first-child {
+  color: #64748b;
+  font-weight: 400;
+  min-width: 7rem;
 }

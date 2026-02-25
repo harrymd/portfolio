@@ -11,6 +11,7 @@ maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile.bind(pmtilesProtocol))
 import type { LoadedData, SnappedPoint } from '../types'
 import AttributionWidget from './AttributionWidget'
 import GallerySection from './GallerySection'
+import ProgressBar, { type ProgressBarItem } from './ProgressBar'
 import './MapJourney.css'
 
 interface Props {
@@ -88,6 +89,22 @@ function scrollPxToKm(px: number, mapping: ScrollMapping): number {
   }
   const t = (px - pxCumulative[lo]) / (pxCumulative[hi] - pxCumulative[lo])
   return kmSamples[lo] + t * (kmSamples[hi] - kmSamples[lo])
+}
+
+function kmToPx(targetKm: number, mapping: ScrollMapping): number {
+  const { kmSamples, pxCumulative } = mapping
+  if (kmSamples.length === 0) return 0
+  if (targetKm <= kmSamples[0]) return pxCumulative[0]
+  const last = kmSamples.length - 1
+  if (targetKm >= kmSamples[last]) return pxCumulative[last]
+  let lo = 0, hi = last
+  while (lo < hi - 1) {
+    const mid = (lo + hi) >> 1
+    if (kmSamples[mid] <= targetKm) lo = mid
+    else hi = mid
+  }
+  const t = (targetKm - kmSamples[lo]) / (kmSamples[hi] - kmSamples[lo])
+  return pxCumulative[lo] + t * (pxCumulative[hi] - pxCumulative[lo])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -201,6 +218,27 @@ export default function MapJourney({ data }: Props) {
   }, [innerPoints])
 
   const scrollMapping = useMemo(() => buildScrollMapping(snappedPoints), [snappedPoints])
+
+  const progressItems = useMemo((): ProgressBarItem[] => {
+    const items: ProgressBarItem[] = []
+    const seenSections = new Set<string>()
+    for (const sp of innerPoints) {
+      if (!sp.sectionName) continue
+      const isFirst = !seenSections.has(sp.sectionName)
+      if (isFirst) seenSections.add(sp.sectionName)
+      items.push({
+        id: `poi-${sp.narrativeId}`,
+        isLarge: isFirst,
+        label: sp.sectionName,
+        scrollPx: kmToPx(sp.distanceAlongPath, scrollMapping),
+      })
+    }
+    items.push({ id: 'pricing', isLarge: true, label: 'Pricing',
+      scrollPx: scrollMapping.totalPx, elementId: 'gallery-pricing' })
+    items.push({ id: 'contact', isLarge: true, label: 'Contact',
+      scrollPx: scrollMapping.totalPx, elementId: 'gallery-contact' })
+    return items
+  }, [innerPoints, scrollMapping])
 
   const kmToLngLat = useCallback(
     (km: number): [number, number] => {
@@ -488,6 +526,13 @@ export default function MapJourney({ data }: Props) {
       />
 
       <div className="map-container" ref={mapContainerRef} />
+
+      <ProgressBar
+        items={progressItems}
+        mapTotalPx={scrollMapping.totalPx}
+        scrollerRef={scrollerRef}
+        inGallery={inGallery}
+      />
 
       <header className={`journey-header${inGallery ? ' journey-header--hidden' : ''}`}>
         <h1 className="journey-heading">Kuril Geospatial</h1>
