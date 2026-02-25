@@ -231,7 +231,7 @@ export default function MapJourney({ data }: Props) {
         scrollPx: kmToPx(sp.distanceAlongPath, scrollMapping),
       })
     }
-    items.push({ id: 'gallery', label: 'Selected Work',
+    items.push({ id: 'gallery', label: 'Selected work',
       scrollPx: scrollMapping.totalPx, elementId: 'gallery-selected-work' })
     items.push({ id: 'pricing', label: 'Pricing',
       scrollPx: scrollMapping.totalPx, elementId: 'gallery-pricing' })
@@ -574,10 +574,15 @@ export default function MapJourney({ data }: Props) {
       <div className="scroll-overlay" ref={scrollerRef}>
         <div style={{ height: `${scrollMapping.totalPx}px` }} />
         <GallerySection />
-        {/* Last element in scroll content — prevents dark map showing through
-            when the browser rubber-bands past the bottom */}
-        <div className="gallery-bottom-buffer" aria-hidden="true" />
       </div>
+
+      {/* Fixed strip above scroll-overlay. Invisible during journey, visible in
+          gallery. Being fixed means rubber-band can't pull it away — it always
+          covers the bottom of the viewport, preventing dark-map bleedthrough. */}
+      <div
+        className={`gallery-bottom-buffer${inGallery ? ' gallery-bottom-buffer--visible' : ''}`}
+        aria-hidden="true"
+      />
 
       <div
         className={`scroll-hint${scrollHintVisible ? '' : ' scroll-hint--hidden'}`}

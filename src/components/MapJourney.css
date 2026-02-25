@@ -212,12 +212,25 @@
 }
 
 /* ── Gallery bottom buffer ───────────────────────── */
-/* Last child inside scroll-overlay. Prevents the browser showing a dark
-   gap below the gallery when rubber-banding past the scroll end. */
+/* Fixed strip sitting above the scroll-overlay (z-index 6 > 5).
+   Hidden during the journey, visible once in the gallery.
+   Being fixed it cannot be pulled away by rubber-band overscroll, so it
+   always covers whatever the browser reveals below the scroll content. */
 .gallery-bottom-buffer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   height: 4rem;
+  z-index: 6;
   background: rgb(241, 245, 254);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.gallery-bottom-buffer--visible {
+  opacity: 1;
 }
 
 /* ── Scroll hint ─────────────────────────────────── */
