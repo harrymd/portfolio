@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="16"
+   height="16"
+   viewBox="0 0 12 12"
+   version="1.1"
+   id="svg29"
+   sodipodi:docname="kuril_logo_16px.svg"
+   inkscape:version="1.0.2 (e86c8708, 2021-01-15)">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1440"
+     inkscape:window-height="900"
+     id="namedview31"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="49.42858"
+     inkscape:cx="6.1213862"
+     inkscape:cy="8.1531774"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     units="px" />
+  <metadata
+     id="metadata10">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:date>2023-03-06T12:40:55.135349</dc:date>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Matplotlib v3.5.1, https://matplotlib.org/</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs14">
+    <style
+       type="text/css"
+       id="style12">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+    <clipPath
+       id="p0673ceeb75-8">
+      <rect
+         x="7.1999998"
+         y="7.1999998"
+         width="237.60001"
+         height="277.20001"
+         id="rect24-1" />
+    </clipPath>
+  </defs>
+  <defs
+     id="defs27" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="Layer 1"
+     style="display:inline">
+    <path
+       d="M 7.2,205.2 H 27 v 19.8 19.8 19.8 19.8 H 46.8 66.6 V 264.6 244.8 225 205.2 185.4 165.6 h 19.8 v 19.8 19.8 19.8 h 19.8 v 19.8 19.8 H 126 v -19.8 h 19.8 19.8 V 225 205.2 H 145.8 V 185.4 165.6 H 126 v -19.8 h 19.8 V 126 h 19.8 19.8 V 106.2 86.4 H 165.6 145.8 126 106.2 v 19.8 H 86.4 66.6 V 86.4 66.6 h 19.8 19.8 19.8 19.8 19.8 19.8 19.8 19.8 V 46.8 h 19.8 V 27 7.2 H 225 205.2 V 27 H 185.4 165.6 145.8 126 106.2 86.4 66.6 V 46.8 H 46.8 V 66.6 H 27 v 19.8 19.8 19.8 19.8 H 7.2 v 19.8 19.8 z"
+       clip-path="url(#p0673ceeb75-8)"
+       style="stroke:#000000;stroke-linecap:butt;stroke-linejoin:miter"
+       id="path19-4"
+       transform="matrix(0.03787878,0,0,0.03787878,1.2272728,0.47727279)" />
+  </g>
+</svg>

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "wildcru",
+    "image_file": "wildcru.png",
+    "title": "Oxford University WildCRU",
+    "description": "I built the <a href='https://www.wildcru.org/projects/wildmaps-species-distribution-model-dashboard/' target='_blank'>WildMAPS Species Distribution Model dashboard</a>. This catalog of raster data is a research tool for ecologists worldwide. It's built to display big files (100s of gigabytes) smoothly and with very low hosting cost (pennies per week). Behind the scenes, the researchers can use the workflow I built to keep the website updated.",
+    "tools": ["rasterio", "shapely", "geopandas", "GDAL", "tippecanoe", "AWS S3", "Maplibre-GL JS", "React", "OpenStreetMap"]
+  },
+  {
+    "id": "nhs",
+    "image_file": "nhs.png",
+    "title": "NHS psychiatrists",
+    "description": "I processed more than five million rows of mental-health reporting, for a group of NHS (UK National Health Service) psychiatrists trying to understand how different restraint methods are used. The results and black-and-white visualisations revealed severe gaps in reporting, and were <a href='https://www.cambridge.org/core/journals/bjpsych-bulletin/article/reporting-of-oral-chemical-restraint-in-the-mental-health-services-monthly-statistics-for-england/CF731E113F65A4921ED00BDC76D3F852' target='_blank'>published in BJPsych Bulletin</a>.",
+    "tools": ["Matplotlib (PyPlot)", "NumPy", "xarray", "Excel"]
+  },
+  {
+    "id": "hydrogen",
+    "image_file": "hydrogen.png",
+    "title": "Hydrogen exploration",
+    "description": "(For confidentiality reasons, no specific details are given.) In a soil-gas survey, I planned survey locations, collected field data, coordinated teams, and plotted results, to determine the prospectivity of a target region.",
+    "tools": ["QGIS", "Google Maps", "Matplotlib (PyPlot)", "NumPy", "Excel"]
+  },
+  {
+    "id": "salgo",
+    "image_file": "salgo.png",
+    "title": "Oxford University SalGo Team",
+    "description": "The SalGo Team were locked in to an expensive subscription for the map on the <a href='https://compadre-db.org/' target='_blank'>homepage</a> of their plant and animal database (COMPADRE/COMADRE). In a day's work, I swapped it out for a permanent, free, improved solution, integrating with their existing PHP backend.",
+    "tools": ["Maplibre-GL JS", "React", "PHP", "OpenStreetMap"]
+  },
+  {
+    "id": "mapaction",
+    "image_file": "mapaction.png",
+    "title": "MapAction",
+    "description": "Since joining UK-based charity <a href = 'https://mapaction.org/' target = '_blank'>MapAction</a> as a geospatial volunteer, I've spent over seven weeks working emergency humanitarian responses. This has included field missions to the 2025 Myanmar earthquake and 2026 floods in southern Mozambique. Under extreme time pressure, we produce maps and manage information for all stages of the response: Search and Rescue, Rapid Needs Assessment, and Distribution. We make use of all sorts of public datasets: OpenStreetMap, gridded population, building extents, and more.",
+    "tools": ["ArcGIS Pro", "QGIS", "Python", "OpenStreetMap"]
+  },
+  {
+    "id": "okko",
+    "image_file": "okko.png",
+    "title": "OKKO Health",
+    "description": "(For confidentiality, no specific details are given.) As a data scientist at startup <a href = 'https://okkohealth.com' target = '_blank'>OKKO Health</a>, I created an algorithm to detect vision loss, based on user data. The algorithm integrated with the existing data pipeline for daily updates.",
+    "tools": ["Python", "Numpy", "Pandas", "Matplotlib", "SQL"]
+  },
+  {
+    "id": "peru",
+    "image_file": "peru.png",
+    "title": "Conservation NGO",
+    "description": "(For confidentiality, no specific details are given.) A conservation organisation, active in the Amazon rainforest, requested cartography (in Spanish) at various scales: a map of their headquarters, a tree survey, cadastral maps, and maps of spiritual sites.",
+    "tools": ["QGIS", "Inkscape"]
+  },
+  {
+    "id": "aurora",
+    "image_file": "aurora.png",
+    "title": "Aurora maps",
+    "description": "As a passion project, I made maps to illustrate the best locations for viewing the aurora borealis. These were #3 in Maps.com's <a href='https://www.maps.com/revisit-the-most-popular-maps-of-2025/'>Most Popular Maps of 2025</a>.",
+    "tools": ["rasterio", "QGIS", "scipy"]
+  },
+  {
+    "id": "tct",
+    "image_file": "tct.png",
+    "title": "Transcaucasian Trail Maps",
+    "description": "As a personal project, I built an <a href = 'https://hkuril.com/html/en/articles/2023_tct/tct_route.html' target = '_blank'>interactive map</a> of the <a href = '' target = '_blank'>Transcaucasian Trail</a>, a long-distance walking route which crosses Armenia and Georgia, as well as a live Garmin satellite tracker map.",
+    "tools": ["Leaflet", "Folium", "Protomaps (PMTiles)"]
+  },
+  {
+    "id": "africa",
+    "image_file": "africa.png",
+    "title": "Project Africa maps",
+    "description": "I developed a set of Python codes to process GPX files, and tested them on the recordings of Russ Cook's remarkable run, from south to north across Africa. See the nerdy <a href = 'https://hkuril.com/html/en/articles/2024_project_africa.html' target = '_blank'>post</a> on my personal blog.",
+    "tools": ["gpxpy", "web scraping", "selenium", "beautifulsoup", "Inkscape", "QGIS", "MatPlotLib"]
+  }
+]
