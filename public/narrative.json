@@ -24,7 +24,7 @@
         },
         {
           "number": 4,
-          "name": "Custom pipelines",
+          "name": "Custom pipelines?",
           "text": "Add to your existing data architecture, create a new workflow, or build a tool that your team can use, or which your customers can interact with.",
           "image": null
         }
@@ -62,12 +62,12 @@
     },
     {
       "number": 3,
-      "name": "Other experience",
+      "name": "My other experience",
       "subsections": [
         {
           "number": 9,
           "name": "Education",
-          "text": "BA, MSci (physics, minor geology) University of Cambridge.\nPhD (seismology) Massachusetts Institute of Technology.\nI have a strong scientific background, especially in physics, mathematics, and geology.",
+          "text": "BA, MSci (physics, minor geology) University of Cambridge.<br>PhD (seismology) Massachusetts Institute of Technology.<br>I have a strong scientific background, especially in physics, mathematics, and geology.",
           "image": null
         },
         {
@@ -85,7 +85,7 @@
         {
           "number": 12,
           "name": "More skills",
-          "text": "See my <a href = '/public/cv_hrmd.pdf' target='_blank'>full CV<a>] for other skills: specific programming and GIS tools, spoken languages, teaching, writing, and even long-distance hiking, if you need trail maps...",
+          "text": "See my <a href = '/public/cv_hrmd.pdf' target='_blank'>full CV</a> for other skills: specific programming and GIS tools, spoken languages, teaching, writing, and even long-distance hiking, if you need trail maps...",
           "image": null
         }
       ]
@@ -97,7 +97,7 @@
         {
           "number": 13,
           "name": "Top quality",
-          "text": "I didn't get a PhD from MIT for careless work. I take pride in my products, and I'm just as invested as you in the quality of the result.",
+          "text": "I take pride in my products, and I'm just as invested as you in the quality of the result.",
           "image": null
         },
         {
