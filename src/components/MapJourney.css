@@ -38,15 +38,15 @@
   left: 0;
   right: 0;
   z-index: 10;
-  padding: 1rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   /* Frosted-glass panel */
-  background: rgba(11, 15, 20, 0.55);
+  background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   pointer-events: none;
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   transition: opacity 0.5s ease;
@@ -60,12 +60,13 @@
 /* Single consistent Pixelify Sans title, linearly scaled 25px→50px */
 .journey-heading {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-accent);
   letter-spacing: 0.02em;
   line-height: 1;
   /* Linear: 25px at 375px width, 50px at 1400px width */
   font-size: clamp(25px, calc(15.854px + 2.439vw), 50px);
+  text-shadow: 2px 2px 0px #374151;
 }
 
 /* Contact block — two lines, linearly scaled 15px→25px */
@@ -73,7 +74,10 @@
   font-family: var(--font-body);
   /* Linear: 15px at 375px width, 25px at 1400px width */
   font-size: clamp(15px, calc(11.341px + 0.976vw), 25px);
-  color: var(--color-text-muted);
+  font-weight: bold;
+  /*text-transform: uppercase;*/
+  font-variant: small-caps;
+  color: #374151;
   pointer-events: auto;
   letter-spacing: 0.03em;
   text-align: right;
@@ -82,8 +86,9 @@
 }
 
 .journey-contact a {
-  color: var(--color-accent);
+  color: var(--color-accent); 
   text-decoration: none;
+  text-transform: none;
 }
 
 .journey-contact a:hover {
@@ -139,10 +144,11 @@
 /* ── Panel sections ──────────────────────────────── */
 .poi-panel-section {
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.14em;
-  text-transform: uppercase;
+  /*text-transform: uppercase;*/
+  font-variant: small-caps;
   color: var(--color-accent);
   margin-bottom: 0.6rem;
 }

@@ -630,41 +630,6 @@
       }
     },
     {
-      "id": "ocean-buffers-outline",
-      "type": "line",
-      "source": "ocean_buffers",
-      "source-layer": "norway_buffer_zones",
-      "paint": {
-        "line-color": [
-          "match",
-          [
-            "get",
-            "buff_num"
-          ],
-          0,
-          "hsl(223, 75%, 71%)",
-          1,
-          "hsl(223, 64%, 73%)",
-          2,
-          "hsl(223, 53%, 76%)",
-          3,
-          "hsl(223, 41%, 78%)",
-          4,
-          "hsl(223, 30%, 80%)",
-          5,
-          "hsl(223, 19%, 83%)",
-          6,
-          "hsl(223, 8%, 85%)",
-          7,
-          "hsl(223, 5%, 88%)",
-          8,
-          "hsl(223, 5%, 88%)",
-          "hsl(223, 5%, 88%)"
-        ],
-        "line-width": 0.8
-      }
-    },
-    {
       "id": "tunnel_motorway_link_casing",
       "type": "line",
       "source": "openmaptiles",

@@ -6,8 +6,9 @@
 
 :root {
   --font-display: 'Pixelify Sans', monospace;
-  --font-body: 'DM Sans', sans-serif;
-
+  /*--font-body: 'DM Sans', sans-serif;*/
+  /*--font-body: 'DM Sans', sans-serif;*/
+  --font-body: 'Space Grotesk', sans-serif;
   --color-bg: #0b0f14;
   --color-surface: rgba(11, 15, 20, 0.85);
   --color-accent: #e03030;

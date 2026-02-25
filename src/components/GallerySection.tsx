@@ -72,7 +72,7 @@ export default function GallerySection() {
         {/* ── Pricing ────────────────────────────────────── */}
         <div className="gallery-extra-section">
           <h2 className="gallery-heading">Pricing</h2>
-          <p className="gallery-filler-text">This is the pricing section</p>
+          <p className="gallery-filler-text">the pricing section</p>
         </div>
 
         {/* ── Contact ────────────────────────────────────── */}

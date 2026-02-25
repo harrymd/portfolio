@@ -37,8 +37,8 @@
         {
           "number": 5,
           "name": "Oxford University WildCRU",
-          "text": "I built the <a href = 'https://www.wildcru.org/projects/wildmaps-species-distribution-model-dashboard/' target='_blank'>WildMAPS Species Distribution Model dashboard</a>. This catalog of raster dataset is a research tool for ecologists worldwide. It's built to display big files (100s of gigabytes) smoothly and with very low hosting cost (pennies per week). Behind the scenes, the researchers can use the workflow I built to keep the website updated.",
-          "image": "wildcru.png"
+          "text": "I built the <a href = 'https://www.wildcru.org/projects/wildmaps-species-distribution-model-dashboard/' target='_blank'>WildMAPS Species Distribution Model dashboard</a>. This owner-updatable catalog of raster data is a research tool for ecologists worldwide. It’s built to display big files (100s of gigabytes) smoothly, with a low hosting cost (pennies per week).",
+          "image": "wildcru.png" 
         },
         {
           "number": 6,
@@ -67,25 +67,25 @@
         {
           "number": 9,
           "name": "Education",
-          "text": "BA, MSci (physics, minor geology) University of Cambridge.<br>PhD (seismology) Massachusetts Institute of Technology.<br>I have a strong scientific background, especially in physics, mathematics, and geology.",
+          "text": "BA, MSci (physics, minor geology) University of Cambridge.<br>PhD (seismology) Massachusetts Institute of Technology.<br>I’m trained as a scientist, with subject knowledge in physics, mathematics, statitistics, geology, and scientific computing.",
           "image": null
         },
         {
           "number": 10,
           "name": "Humanitarian disaster response",
-          "text": "I'm a deployable geospatial volunteer for MapAction, with over seven weeks of emergency response experience, including field missions in Myanmar and Mozambique.",
+          "text": "I'm a deployable geospatial volunteer for <a href = 'https://mapaction.org/' target = '_blank'>MapAction</a>, with over seven weeks of emergency response experience, including field missions in Myanmar and Mozambique.",
           "image": null
         },
         {
           "number": 11,
-          "name": "Fieldwork",
+          "name": "Scientific fieldwork",
           "text": "I've done than 21 weeks of geological and geophysical fieldwork in Europe, the Americas, and India, including: six weeks of solo mapping in Jamaica, and leading a gravity survey in Saint Lucia.",
           "image": null
         },
         {
           "number": 12,
           "name": "More skills",
-          "text": "See my <a href = '/public/cv_hrmd.pdf' target='_blank'>full CV</a> for other skills: specific programming and GIS tools, spoken languages, teaching, writing, and even long-distance hiking, if you need trail maps...",
+          "text": "See my <a href = '/public/cv_hrmd.pdf' target='_blank'>full CV</a> for other skills: programming and GIS tools, spoken languages, teaching, writing, and even long-distance hiking, if you need trail maps...",
           "image": null
         }
       ]
@@ -115,7 +115,7 @@
         {
           "number": 16,
           "name": "Communication and iteration",
-          "text": "I'm a good communicator and I'll iterate the product with you to make sure you get what you want. So... get in touch!",
+          "text": "I'm a good communicator and I'll iterate the product with you to make sure you get what you want. So... get in touch! Email me, Harry, at: <a href='mailto:projects@HKuril.com'>projects@HKuril.com</a>",
           "image": null
         }
       ]

@@ -20,11 +20,11 @@ interface Props {
 const FIXED_ZOOM        = 10
 const FIXED_BEARING     = 220
 const POI_WINDOW_KM     = 10
-const BASE_PX_PER_KM    = 300   // halved → 2× faster scroll
+const BASE_PX_PER_KM    = 100   // halved → 2× faster scroll
 const SLOW_FACTOR       = 2     // 2× px/km near POIs
 const MOBILE_BREAKPOINT = 768
-const ARROW_SCROLL_PX   = 550   // increased by 150%
-const GALLERY_FADE_PX   = 250
+const ARROW_SCROLL_PX   = 750
+const GALLERY_FADE_PX   = 2000 
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Scroll mapping: piecewise linear with SLOW_FACTOR dwell near each POI
@@ -510,6 +510,7 @@ export default function MapJourney({ data }: Props) {
               />
               {displayedPoi.image && (
                 <img
+                  key={displayedPoi.image}
                   className="poi-panel-image"
                   src={`/gallery/${displayedPoi.image}`}
                   alt={displayedPoi.subsectionName}
