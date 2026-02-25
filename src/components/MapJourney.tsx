@@ -17,16 +17,17 @@ interface Props {
   data: LoadedData
 }
 
-const FIXED_ZOOM = 10
-const FIXED_BEARING = 220
-const POI_WINDOW_KM = 10
-const BASE_PX_PER_KM = 600
-const SLOW_FACTOR = 2       // 2× px/km near POIs → 50% slower scroll
+const FIXED_ZOOM        = 10
+const FIXED_BEARING     = 220
+const POI_WINDOW_KM     = 10
+const BASE_PX_PER_KM    = 300   // halved → 2× faster scroll
+const SLOW_FACTOR       = 2     // 2× px/km near POIs
 const MOBILE_BREAKPOINT = 768
-const ARROW_SCROLL_PX = 220 // pixels per arrow-key press
+const ARROW_SCROLL_PX   = 550   // increased by 150%
+const GALLERY_FADE_PX   = 250
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Scroll mapping: piecewise linear with 2× dwell near each POI
+// Scroll mapping: piecewise linear with SLOW_FACTOR dwell near each POI
 // ─────────────────────────────────────────────────────────────────────────────
 interface ScrollMapping {
   kmSamples: number[]
@@ -37,11 +38,11 @@ interface ScrollMapping {
 function buildScrollMapping(snappedPoints: SnappedPoint[]): ScrollMapping {
   if (snappedPoints.length === 0) return { kmSamples: [], pxCumulative: [], totalPx: 0 }
 
-  const startKm = snappedPoints[0].distanceAlongPath
-  const endKm   = snappedPoints[snappedPoints.length - 1].distanceAlongPath
-  const STEP_KM = 0.2
+  const startKm  = snappedPoints[0].distanceAlongPath
+  const endKm    = snappedPoints[snappedPoints.length - 1].distanceAlongPath
+  const STEP_KM  = 0.2
 
-  const numSteps = Math.max(Math.ceil((endKm - startKm) / STEP_KM), 1)
+  const numSteps        = Math.max(Math.ceil((endKm - startKm) / STEP_KM), 1)
   const kmSamples: number[]    = []
   const pxCumulative: number[] = []
   let cumPx = 0
@@ -67,7 +68,6 @@ function buildScrollMapping(snappedPoints: SnappedPoint[]): ScrollMapping {
     }
   }
 
-  // Tail: half a beat of dwell after the last POI
   const totalPx = cumPx + BASE_PX_PER_KM * 0.5
   return { kmSamples, pxCumulative, totalPx }
 }
@@ -91,7 +91,7 @@ function scrollPxToKm(px: number, mapping: ScrollMapping): number {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Canvas icon builders for MapLibre image sprites
+// Canvas icon builders
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Small rightward-pointing arrow placed along the path line. */
@@ -105,17 +105,17 @@ function makePathArrow(): { width: number; height: number; data: Uint8Array } {
   ctx.globalAlpha = 0.85
   ctx.fillStyle = '#e03030'
   ctx.beginPath()
-  ctx.moveTo(size - 2, cy)          // tip → right
-  ctx.lineTo(2, 2)                  // top-left corner
-  ctx.lineTo(Math.round(size * 0.4), cy) // inner notch
-  ctx.lineTo(2, size - 2)           // bottom-left corner
+  ctx.moveTo(size - 2, cy)
+  ctx.lineTo(2, 2)
+  ctx.lineTo(Math.round(size * 0.4), cy)
+  ctx.lineTo(2, size - 2)
   ctx.closePath()
   ctx.fill()
   return { width: size, height: size, data: new Uint8Array(ctx.getImageData(0, 0, size, size).data.buffer) }
 }
 
 /**
- * Upward-pointing (north = 0°) arrow used for the live position cursor.
+ * Upward-pointing (north = 0°) arrow for the live position cursor.
  * MapLibre rotates it via icon-rotate: ['get', 'bearing'].
  */
 function makeCursorArrow(): { width: number; height: number; data: Uint8Array } {
@@ -126,19 +126,17 @@ function makeCursorArrow(): { width: number; height: number; data: Uint8Array } 
   const ctx = canvas.getContext('2d')!
   const cx = size / 2
 
-  // White filled arrow pointing upward
   ctx.shadowColor = 'rgba(224,48,48,0.6)'
   ctx.shadowBlur = 5
   ctx.fillStyle = '#ffffff'
   ctx.beginPath()
-  ctx.moveTo(cx, 2)                    // tip
-  ctx.lineTo(size - 5, size - 4)       // bottom-right
-  ctx.lineTo(cx, Math.round(size * 0.62)) // notch
-  ctx.lineTo(5, size - 4)              // bottom-left
+  ctx.moveTo(cx, 2)
+  ctx.lineTo(size - 5, size - 4)
+  ctx.lineTo(cx, Math.round(size * 0.62))
+  ctx.lineTo(5, size - 4)
   ctx.closePath()
   ctx.fill()
 
-  // Red stroke
   ctx.shadowBlur = 0
   ctx.strokeStyle = '#e03030'
   ctx.lineWidth = 1.5
@@ -156,14 +154,17 @@ export default function MapJourney({ data }: Props) {
   const scrollerRef     = useRef<HTMLDivElement>(null)
   const rafRef          = useRef<number | null>(null)
   const detailTimerRef  = useRef<number | null>(null)
+  const idleTimerRef    = useRef<number | null>(null)
 
-  const [activePoiIndex, setActivePoiIndex]       = useState<number | null>(null)
+  const [mapReady, setMapReady]             = useState(false)
+  const [activePoiIndex, setActivePoiIndex] = useState<number | null>(null)
   const [currentSectionName, setCurrentSectionName] = useState<string>('')
-  const [scrollHintVisible, setScrollHintVisible]   = useState(true)
-  const [inGallery, setInGallery]                   = useState(false)
+  const [sectionVisible, setSectionVisible] = useState(false)
+  const [scrollHintVisible, setScrollHintVisible] = useState(true)
+  const [inGallery, setInGallery]           = useState(false)
 
   // Cross-fade states
-  const [displayedPoi, setDisplayedPoi] = useState<SnappedPoint | null>(null)
+  const [displayedPoi, setDisplayedPoi]   = useState<SnappedPoint | null>(null)
   const [detailVisible, setDetailVisible] = useState(false)
 
   const { pathFeature, snappedPoints, style } = data
@@ -173,16 +174,33 @@ export default function MapJourney({ data }: Props) {
     [pathFeature],
   )
 
-  // POIs shown on map and used for panel (exclude first and last)
+  // POIs shown on map and eligible for panel activation (exclude first and last)
   const innerPoints = useMemo(
     () => (snappedPoints.length > 2 ? snappedPoints.slice(1, -1) : snappedPoints),
     [snappedPoints],
   )
 
-  const scrollMapping = useMemo(() => buildScrollMapping(snappedPoints), [snappedPoints])
+  // Per-section km ranges: [firstPoi.dist − POI_WINDOW_KM … lastPoi.dist + POI_WINDOW_KM]
+  // The section header is visible anywhere inside this range.
+  const sectionRanges = useMemo(() => {
+    const ranges: { sectionName: string; minKm: number; maxKm: number }[] = []
+    for (const sp of innerPoints) {
+      if (!sp.sectionName) continue
+      const last = ranges[ranges.length - 1]
+      if (last && last.sectionName === sp.sectionName) {
+        last.maxKm = sp.distanceAlongPath + POI_WINDOW_KM
+      } else {
+        ranges.push({
+          sectionName: sp.sectionName,
+          minKm: sp.distanceAlongPath - POI_WINDOW_KM,
+          maxKm: sp.distanceAlongPath + POI_WINDOW_KM,
+        })
+      }
+    }
+    return ranges
+  }, [innerPoints])
 
-  // Gallery begins to fade in when this many px remain before scrollRange end
-  const GALLERY_FADE_PX = 250
+  const scrollMapping = useMemo(() => buildScrollMapping(snappedPoints), [snappedPoints])
 
   const kmToLngLat = useCallback(
     (km: number): [number, number] => {
@@ -209,12 +227,11 @@ export default function MapJourney({ data }: Props) {
     const map      = mapRef.current
     if (!scroller || !map) return
 
-    const scrollTop    = scroller.scrollTop
+    const scrollTop     = scroller.scrollTop
     const scrollRangePx = scrollMapping.totalPx
     const galleryThreshold = Math.max(0, scrollRangePx - GALLERY_FADE_PX)
     setInGallery(scrollTop >= galleryThreshold)
 
-    // Clamp to path end so map camera doesn't wander while in gallery
     const clampedPx = Math.min(scrollTop, scrollRangePx)
     const km        = scrollPxToKm(clampedPx, scrollMapping)
     const center    = kmToLngLat(km)
@@ -224,7 +241,6 @@ export default function MapJourney({ data }: Props) {
 
     map.easeTo({ center, zoom: FIXED_ZOOM, bearing: FIXED_BEARING, duration: 100, easing: (t) => t, offset })
 
-    // Update cursor source: position + direction
     const bearing = getBearingAtKm(km)
     const cursorSource = map.getSource('journey-cursor') as maplibregl.GeoJSONSource | undefined
     if (cursorSource) {
@@ -237,33 +253,32 @@ export default function MapJourney({ data }: Props) {
 
     if (scrollTop > 10) setScrollHintVisible(false)
 
-    // Active POI: first innerPoint within ±POI_WINDOW_KM (skip first/last of full array)
-    const firstInnerIdx = snappedPoints.length > 2 ? 1 : 0
-    const lastInnerIdx  = snappedPoints.length > 2 ? snappedPoints.length - 2 : snappedPoints.length - 1
+    // Active POI: first innerPoint within ±POI_WINDOW_KM
+    const firstIdx = snappedPoints.length > 2 ? 1 : 0
+    const lastIdx  = snappedPoints.length > 2 ? snappedPoints.length - 2 : snappedPoints.length - 1
     let newActive: number | null = null
-    for (let i = firstInnerIdx; i <= lastInnerIdx; i++) {
+    for (let i = firstIdx; i <= lastIdx; i++) {
       if (Math.abs(km - snappedPoints[i].distanceAlongPath) <= POI_WINDOW_KM) {
         newActive = i
         break
       }
     }
 
-    // Section name: from the active POI when visible, else from nearest passed innerPoint
-    let newSectionName = ''
-    if (newActive !== null) {
-      newSectionName = snappedPoints[newActive].sectionName
-    } else {
-      for (let i = innerPoints.length - 1; i >= 0; i--) {
-        if (innerPoints[i].distanceAlongPath <= km) {
-          newSectionName = innerPoints[i].sectionName
-          break
-        }
+    // Section header visibility: true while km is inside any section's full range
+    let newSectionVisible = false
+    let newSectionName    = ''
+    for (const range of sectionRanges) {
+      if (km >= range.minKm && km <= range.maxKm) {
+        newSectionVisible = true
+        newSectionName    = range.sectionName
+        break
       }
     }
 
     setActivePoiIndex(newActive)
+    setSectionVisible(newSectionVisible)
     setCurrentSectionName(newSectionName)
-  }, [snappedPoints, innerPoints, scrollMapping, kmToLngLat, getBearingAtKm])
+  }, [snappedPoints, sectionRanges, scrollMapping, kmToLngLat, getBearingAtKm])
 
   // Cross-fade subsection detail when active POI changes
   const activePoi: SnappedPoint | null =
@@ -307,17 +322,24 @@ export default function MapJourney({ data }: Props) {
 
     mapRef.current = map
 
+    // Fallback: show map after 8 s even if idle never fires (e.g. PMTiles 403)
+    idleTimerRef.current = window.setTimeout(() => setMapReady(true), 8000)
+
     map.on('load', () => {
+      // Compute initial cursor bearing at the journey start
+      const startKm  = snappedPoints[0]?.distanceAlongPath ?? 0
+      const bKm2     = Math.min(data.totalDistance, startKm + 0.5)
+      const bPt1     = turf.along(pathLine, startKm, { units: 'kilometers' })
+      const bPt2     = turf.along(pathLine, bKm2,    { units: 'kilometers' })
+      const initBearing = turf.bearing(bPt1, bPt2)
+
       // Register custom icon sprites
-      const pathArrow   = makePathArrow()
-      const cursorArrow = makeCursorArrow()
-      map.addImage('path-arrow',   pathArrow)
-      map.addImage('cursor-arrow', cursorArrow)
+      map.addImage('path-arrow',   makePathArrow())
+      map.addImage('cursor-arrow', makeCursorArrow())
 
       // ── Path ──────────────────────────────────────────────
       map.addSource('journey-path', { type: 'geojson', data: data.pathGeoJSON })
 
-      // Glow halo
       map.addLayer({
         id: 'journey-path-bg',
         type: 'line',
@@ -325,7 +347,6 @@ export default function MapJourney({ data }: Props) {
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': '#b01a1a', 'line-width': 8, 'line-opacity': 0.18 },
       })
-      // Crisp line
       map.addLayer({
         id: 'journey-path-line',
         type: 'line',
@@ -333,7 +354,6 @@ export default function MapJourney({ data }: Props) {
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': '#e03030', 'line-width': 2, 'line-opacity': 0.9 },
       })
-      // Directional arrows along the path
       map.addLayer({
         id: 'journey-path-arrows',
         type: 'symbol',
@@ -383,10 +403,9 @@ export default function MapJourney({ data }: Props) {
         data: {
           type: 'Feature',
           geometry: { type: 'Point', coordinates: initialCenter },
-          properties: { bearing: 0 },
+          properties: { bearing: initBearing },
         },
       })
-      // Outer glow ring
       map.addLayer({
         id: 'journey-cursor-ring',
         type: 'circle',
@@ -399,7 +418,6 @@ export default function MapJourney({ data }: Props) {
           'circle-stroke-opacity': 0.4,
         },
       })
-      // Directional arrow symbol (rotated by bearing property)
       map.addLayer({
         id: 'journey-cursor-arrow',
         type: 'symbol',
@@ -413,9 +431,16 @@ export default function MapJourney({ data }: Props) {
           'icon-ignore-placement': true,
         },
       })
+
+      // Reveal the map once all tiles (including PMTiles) are rendered
+      map.once('idle', () => {
+        if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+        setMapReady(true)
+      })
     })
 
     return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
       map.remove()
       mapRef.current = null
     }
@@ -450,20 +475,24 @@ export default function MapJourney({ data }: Props) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
-  // Panel: visible only when an active POI exists OR during cross-fade
-  const panelVisible = activePoi !== null || detailVisible
+  // Panel outer box: visible while km is inside a section's range, or during fade
+  const panelVisible = sectionVisible || detailVisible
 
   return (
     <div className="journey-root">
+      {/* Dark overlay that fades out once the map+PMTiles tiles have rendered */}
+      <div
+        className="map-loading-overlay"
+        style={{ opacity: mapReady ? 0 : 1, pointerEvents: mapReady ? 'none' : 'auto' }}
+        aria-hidden="true"
+      />
+
       <div className="map-container" ref={mapContainerRef} />
 
       <header className={`journey-header${inGallery ? ' journey-header--hidden' : ''}`}>
-        <h1 className="journey-heading">
-          <span className="journey-heading-kuril">Kuril</span>
-          <span className="journey-heading-geo">Geospatial</span>
-        </h1>
+        <h1 className="journey-heading">Kuril Geospatial</h1>
         <div className="journey-contact">
-          Contact Harry:&nbsp;
+          Contact Harry:<br />
           <a href="mailto:projects@HKuril.com">projects@HKuril.com</a>
         </div>
       </header>
@@ -496,11 +525,9 @@ export default function MapJourney({ data }: Props) {
 
       <AttributionWidget hidden={inGallery} />
 
-      {/* Scroll capture overlay: map spacer + gallery */}
+      {/* Scroll capture overlay: journey spacer + gallery */}
       <div className="scroll-overlay" ref={scrollerRef}>
-        {/* Transparent spacer that creates the map-journey scroll depth */}
         <div style={{ height: `${scrollMapping.totalPx}px` }} />
-        {/* Gallery scrolls up from below, covering the fixed map */}
         <GallerySection />
       </div>
 

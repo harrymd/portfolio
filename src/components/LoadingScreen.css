@@ -13,8 +13,8 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(125, 211, 252, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(125, 211, 252, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(224, 48, 48, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(224, 48, 48, 0.04) 1px, transparent 1px);
   background-size: 40px 40px;
   pointer-events: none;
 }
@@ -36,22 +36,16 @@
   font-size: clamp(2rem, 6vw, 3.5rem);
   font-weight: 700;
   letter-spacing: 0.02em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1;
-  gap: 0.2em;
-}
-
-.loading-title-kuril {
   color: var(--color-accent);
+  line-height: 1;
+  text-align: center;
+  /* Hidden until Pixelify Sans is confirmed loaded */
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
-.loading-title-geo {
-  color: var(--color-text-muted);
-  font-size: 0.55em;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
+.loading-title--visible {
+  opacity: 1;
 }
 
 .loading-bar-track {

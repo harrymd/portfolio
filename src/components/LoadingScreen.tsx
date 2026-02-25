@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import * as turf from '@turf/turf'
 import type { Feature, LineString, FeatureCollection } from 'geojson'
+import * as turf from '@turf/turf'
 import type { LoadedData, NarrativeData, SnappedPoint } from '../types'
 import './LoadingScreen.css'
 
@@ -9,9 +9,27 @@ interface Props {
 }
 
 export default function LoadingScreen({ onLoaded }: Props) {
-  const [status, setStatus] = useState('Initialising...')
+  const [status, setStatus]     = useState('Initialising...')
   const [progress, setProgress] = useState(0)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError]       = useState<string | null>(null)
+  const [fontReady, setFontReady] = useState(false)
+
+  // Show title only after Pixelify Sans has loaded so it doesn't flash in
+  // with a fallback font.
+  useEffect(() => {
+    const timer = setTimeout(() => setFontReady(true), 2500) // hard fallback
+    document.fonts
+      .load("700 1em 'Pixelify Sans'")
+      .then(() => {
+        clearTimeout(timer)
+        setFontReady(true)
+      })
+      .catch(() => {
+        clearTimeout(timer)
+        setFontReady(true)
+      })
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -43,7 +61,6 @@ export default function LoadingScreen({ onLoaded }: Props) {
         setProgress(60)
         setStatus('Building narrative index...')
 
-        // Flat lookup: subsection.number → { sectionName, subsectionName, text, image }
         type NarrativeLookup = {
           sectionName: string
           subsectionName: string
@@ -65,8 +82,8 @@ export default function LoadingScreen({ onLoaded }: Props) {
         setProgress(70)
         setStatus('Calculating path geometry...')
 
-        const pathFeature = pathGeoJSON.features[0] as Feature<LineString>
-        const pathLine = turf.lineString(pathFeature.geometry.coordinates)
+        const pathFeature  = pathGeoJSON.features[0] as Feature<LineString>
+        const pathLine     = turf.lineString(pathFeature.geometry.coordinates)
         const totalDistance = turf.length(pathLine, { units: 'kilometers' })
 
         setProgress(85)
@@ -74,14 +91,13 @@ export default function LoadingScreen({ onLoaded }: Props) {
 
         const snappedPoints: SnappedPoint[] = labelledPointsGeoJSON.features.map((feat) => {
           const rawId = (feat.properties as Record<string, unknown>)['id'] as number
-          const pt = feat.geometry as { type: string; coordinates: [number, number] }
+          const pt    = feat.geometry as { type: string; coordinates: [number, number] }
           const turfPt = turf.point(pt.coordinates)
 
-          const snapped = turf.nearestPointOnLine(pathLine, turfPt, { units: 'kilometers' })
-          const snappedCoord = snapped.geometry.coordinates as [number, number]
+          const snapped        = turf.nearestPointOnLine(pathLine, turfPt, { units: 'kilometers' })
+          const snappedCoord   = snapped.geometry.coordinates as [number, number]
           const distanceAlongPath = snapped.properties.location ?? 0
 
-          // Look up narrative content by id (direct match on subsection.number)
           const narrative = narrativeLookup.get(rawId)
 
           return {
@@ -120,10 +136,9 @@ export default function LoadingScreen({ onLoaded }: Props) {
   return (
     <div className="loading-screen">
       <div className="loading-content">
-        <div className="loading-title">
-          <span className="loading-title-kuril">Kuril</span>
-          <span className="loading-title-geo">Geospatial</span>
-        </div>
+        <h1 className={`loading-title${fontReady ? ' loading-title--visible' : ''}`}>
+          Kuril Geospatial
+        </h1>
         {error ? (
           <div className="loading-error">
             <span className="loading-error-icon">⚠</span>

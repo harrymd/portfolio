@@ -4,6 +4,15 @@
   overflow: hidden;
 }
 
+/* ── Map loading overlay (fades out on first idle) ── */
+.map-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: #0b0f14;
+  z-index: 100;
+  transition: opacity 1s ease;
+}
+
 /* ── Map ─────────────────────────────────────────── */
 .map-container {
   position: absolute;
@@ -29,13 +38,17 @@
   left: 0;
   right: 0;
   z-index: 10;
-  padding: 1.25rem 2rem;
-  background: linear-gradient(to bottom, rgba(11,15,20,0.8) 0%, transparent 100%);
+  padding: 1rem 1.5rem;
+  /* Frosted-glass panel */
+  background: rgba(11, 15, 20, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   pointer-events: none;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 1rem;
   transition: opacity 0.5s ease;
 }
 
@@ -44,38 +57,28 @@
   pointer-events: none !important;
 }
 
+/* Single consistent Pixelify Sans title, linearly scaled 25px→50px */
 .journey-heading {
   font-family: var(--font-display);
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 0.4em;
-  line-height: 1;
-}
-
-.journey-heading-kuril {
-  font-size: clamp(1.6rem, 4vw, 2.6rem);
   font-weight: 700;
   color: var(--color-accent);
   letter-spacing: 0.02em;
+  line-height: 1;
+  /* Linear: 25px at 375px width, 50px at 1400px width */
+  font-size: clamp(25px, calc(15.854px + 2.439vw), 50px);
 }
 
-.journey-heading-geo {
-  font-size: clamp(0.75rem, 1.5vw, 1rem);
-  font-weight: 500;
-  color: var(--color-text-muted);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-
+/* Contact block — two lines, linearly scaled 15px→25px */
 .journey-contact {
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  /* Linear: 15px at 375px width, 25px at 1400px width */
+  font-size: clamp(15px, calc(11.341px + 0.976vw), 25px);
   color: var(--color-text-muted);
   pointer-events: auto;
   letter-spacing: 0.03em;
-  padding-top: 0.35rem;
   text-align: right;
+  line-height: 1.4;
+  flex-shrink: 0;
 }
 
 .journey-contact a {
@@ -213,7 +216,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  color: var(--color-text-muted);
+  color: #64748b;
   font-family: var(--font-body);
   font-size: 0.7rem;
   letter-spacing: 0.1em;
@@ -226,7 +229,13 @@
   font-size: 0.6rem;
   letter-spacing: 0.06em;
   text-transform: none;
-  opacity: 0.7;
+  opacity: 0.8;
+}
+
+@media (max-width: 767px) {
+  .scroll-hint-sub {
+    display: none;
+  }
 }
 
 .scroll-hint svg {

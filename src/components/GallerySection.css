@@ -1,54 +1,69 @@
+/* ── Gallery section wrapper ─────────────────────────
+   The first 50 vh of the section is a dark-to-light
+   gradient "entry buffer" that slows the visual pace
+   of entering the gallery.                           */
 .gallery-section {
-  background: #0b0f14;
-  min-height: 100vh;
-  padding: 5rem 2.5rem 6rem;
+  padding-top: 50vh;
+  /* Dark → light gradient over the buffer zone, then solid light */
+  background: linear-gradient(to bottom, #0b0f14 0, rgb(241, 245, 254) 50vh);
   pointer-events: auto;
+  padding-bottom: 6rem;
 }
 
 .gallery-inner {
   max-width: 1100px;
   margin: 0 auto;
+  padding: 0 2.5rem;
 }
 
+/* ── Section headings ────────────────────────────── */
 .gallery-heading {
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
-  color: var(--color-accent);
-  margin-bottom: 3rem;
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  color: #c01818;
+  margin-bottom: 2rem;
   letter-spacing: 0.03em;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(180, 190, 210, 0.6);
+  padding-bottom: 0.75rem;
 }
 
-/* ── Two-column masonry flow ─────────────────────────── */
+/* ── Two interleaved columns (row-wise item order) ─ */
 .gallery-grid {
-  column-count: 2;
-  column-gap: 2.5rem;
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.gallery-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
 }
 
 @media (max-width: 767px) {
   .gallery-grid {
-    column-count: 1;
+    flex-direction: column;
   }
 }
 
-/* ── Cards ───────────────────────────────────────────── */
+/* ── Cards ───────────────────────────────────────── */
 .gallery-card {
-  break-inside: avoid;
-  -webkit-column-break-inside: avoid;
-  overflow: hidden;
-  margin-bottom: 2rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
+  background: rgb(236, 240, 250);
+  border: 1px solid rgba(180, 190, 215, 0.7);
+  border-radius: 8px;
   padding: 1.5rem;
+  overflow: hidden;
 }
 
 .gallery-card-title {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: #1e293b;
   margin-bottom: 0.75rem;
   line-height: 1.25;
 }
@@ -57,21 +72,21 @@
   font-family: var(--font-body);
   font-size: 0.875rem;
   line-height: 1.7;
-  color: var(--color-text-muted);
+  color: #374151;
   margin-bottom: 1rem;
 }
 
 .gallery-card-desc a {
-  color: var(--color-accent);
+  color: #c01818;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 .gallery-card-desc a:hover {
-  opacity: 0.8;
+  opacity: 0.75;
 }
 
-/* ── Tool pills ──────────────────────────────────────── */
+/* ── Tool pills ──────────────────────────────────── */
 .gallery-card-tools {
   display: flex;
   flex-wrap: wrap;
@@ -83,20 +98,31 @@
   font-family: var(--font-body);
   font-size: 0.68rem;
   padding: 0.2rem 0.65rem;
-  background: var(--color-accent-dim);
-  border: 1px solid var(--color-border);
+  background: rgba(192, 24, 24, 0.09);
+  border: 1px solid rgba(192, 24, 24, 0.25);
   border-radius: 100px;
-  color: var(--color-accent);
+  color: #c01818;
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
 
-/* ── Image ───────────────────────────────────────────── */
+/* ── Image ───────────────────────────────────────── */
 .gallery-card-img {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 5px;
   display: block;
-  opacity: 0.92;
+}
+
+/* ── Extra sections (Pricing, Contact …) ─────────── */
+.gallery-extra-section {
+  margin-top: 4rem;
+}
+
+.gallery-filler-text {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #475569;
 }
