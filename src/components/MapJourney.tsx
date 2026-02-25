@@ -556,7 +556,7 @@ export default function MapJourney({ data }: Props) {
                 <img
                   key={displayedPoi.image}
                   className="poi-panel-image"
-                  src={`/gallery/${displayedPoi.image}`}
+                  src={`${import.meta.env.BASE_URL}gallery/${displayedPoi.image}`}
                   alt={displayedPoi.subsectionName}
                   onError={(e) => {
                     ;(e.currentTarget as HTMLImageElement).style.display = 'none'

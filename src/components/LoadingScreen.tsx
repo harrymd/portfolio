@@ -37,11 +37,12 @@ export default function LoadingScreen({ onLoaded }: Props) {
         setStatus('Loading map style...')
         setProgress(10)
 
+        const base = import.meta.env.BASE_URL
         const [styleRes, pathRes, pointsRes, narrativeRes] = await Promise.all([
-          fetch('/composite.json'),
-          fetch('/ship_track.geojson'),
-          fetch('/labelled_points.geojson'),
-          fetch('/narrative.json'),
+          fetch(`${base}composite.json`),
+          fetch(`${base}ship_track.geojson`),
+          fetch(`${base}labelled_points.geojson`),
+          fetch(`${base}narrative.json`),
         ])
 
         if (!styleRes.ok || !pathRes.ok || !pointsRes.ok || !narrativeRes.ok) {

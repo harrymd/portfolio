@@ -26,7 +26,7 @@ function GalleryCard({ entry }: { entry: GalleryEntry }) {
       </div>
       <img
         className="gallery-card-img"
-        src={`/gallery/${entry.image_file}`}
+        src={`${import.meta.env.BASE_URL}gallery/${entry.image_file}`}
         alt={entry.title}
         onError={(e) => {
           ;(e.currentTarget as HTMLImageElement).style.display = 'none'
@@ -40,7 +40,7 @@ export default function GallerySection() {
   const [entries, setEntries] = useState<GalleryEntry[]>([])
 
   useEffect(() => {
-    fetch('/gallery_content.json')
+    fetch(`${import.meta.env.BASE_URL}gallery_content.json`)
       .then((r) => r.json())
       .then(setEntries)
       .catch(console.error)
@@ -54,8 +54,8 @@ export default function GallerySection() {
     <section className="gallery-section">
       <div className="gallery-inner">
 
-        {/* ── Selected Work ──────────────────────────────── */}
-        <h2 id="gallery-selected-work" className="gallery-heading">Selected Work</h2>
+        {/* ── Selected work ──────────────────────────────── */}
+        <h2 id="gallery-selected-work" className="gallery-heading">Selected work</h2>
         <div className="gallery-grid">
           <div className="gallery-col">
             {leftCol.map((entry) => (
@@ -95,7 +95,7 @@ export default function GallerySection() {
           <div className="gallery-table-pair">
             <div>
               <p className="gallery-subheading gallery-subheading--minor">
-                Charity / non-profit /<br />academic
+                Charity, non-profit, <br />or academic
               </p>
               <div className="gallery-table-wrap">
                 <table className="gallery-table gallery-table--narrow">
@@ -107,7 +107,7 @@ export default function GallerySection() {
               </div>
             </div>
             <div>
-              <p className="gallery-subheading gallery-subheading--minor">Industry</p>
+				<p className="gallery-subheading gallery-subheading--minor">Industry<br/>&nbsp; </p>
               <div className="gallery-table-wrap">
                 <table className="gallery-table gallery-table--narrow">
                   <tbody>
@@ -120,7 +120,7 @@ export default function GallerySection() {
           </div>
 
           <p className="gallery-filler-text">
-            Prices in GBP (or local equivalent for US, EU, or other customers).
+            Prices in GBP (conversion made to local equivalent for US, EU, or other customers, based on current exchange rates).
             Invoices provided.
           </p>
         </div>
