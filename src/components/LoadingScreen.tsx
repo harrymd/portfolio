@@ -63,15 +63,19 @@ export default function LoadingScreen({ onLoaded }: Props) {
 
         type NarrativeLookup = {
           sectionName: string
+          contentsName: string
           subsectionName: string
           text: string
           image: string | null
         }
         const narrativeLookup = new Map<number, NarrativeLookup>()
         for (const section of narrativeRaw.sections) {
+          const contentsName =
+            (section as unknown as Record<string, unknown>)['contents-name'] as string ?? section.name
           for (const sub of section.subsections) {
             narrativeLookup.set(sub.number, {
               sectionName: section.name,
+              contentsName,
               subsectionName: sub.name,
               text: sub.text,
               image: sub.image,
@@ -103,6 +107,7 @@ export default function LoadingScreen({ onLoaded }: Props) {
           return {
             narrativeId: rawId,
             sectionName: narrative?.sectionName ?? '',
+            contentsName: narrative?.contentsName ?? '',
             subsectionName: narrative?.subsectionName ?? '',
             text: narrative?.text ?? '',
             image: narrative?.image ?? null,

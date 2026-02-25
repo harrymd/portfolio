@@ -55,7 +55,7 @@ export default function GallerySection() {
       <div className="gallery-inner">
 
         {/* ── Selected Work ──────────────────────────────── */}
-        <h2 className="gallery-heading">Selected Work</h2>
+        <h2 id="gallery-selected-work" className="gallery-heading">Selected Work</h2>
         <div className="gallery-grid">
           <div className="gallery-col">
             {leftCol.map((entry) => (
@@ -92,20 +92,31 @@ export default function GallerySection() {
           </div>
 
           <p className="gallery-subheading">Rates</p>
-          <div className="gallery-table-wrap">
-            <table className="gallery-table">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Charity&nbsp;/ Non-profit&nbsp;/ Academic</th>
-                  <th>Industry</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Daily rate</td><td>£300</td><td>£500</td></tr>
-                <tr><td>Hourly rate</td><td>£50</td><td>£80</td></tr>
-              </tbody>
-            </table>
+          <div className="gallery-table-pair">
+            <div>
+              <p className="gallery-subheading gallery-subheading--minor">
+                Charity / non-profit /<br />academic
+              </p>
+              <div className="gallery-table-wrap">
+                <table className="gallery-table gallery-table--narrow">
+                  <tbody>
+                    <tr><td>Daily rate</td><td>£300</td></tr>
+                    <tr><td>Hourly rate</td><td>£50</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div>
+              <p className="gallery-subheading gallery-subheading--minor">Industry</p>
+              <div className="gallery-table-wrap">
+                <table className="gallery-table gallery-table--narrow">
+                  <tbody>
+                    <tr><td>Daily rate</td><td>£500</td></tr>
+                    <tr><td>Hourly rate</td><td>£80</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           <p className="gallery-filler-text">

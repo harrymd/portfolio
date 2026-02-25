@@ -20,6 +20,7 @@ export interface NarrativeData {
 export interface SnappedPoint {
   narrativeId: number           // the 'id' from labelled_points.geojson
   sectionName: string           // parent section name from narrative
+  contentsName: string          // short section name from narrative 'contents-name'
   subsectionName: string        // subsection name from narrative
   text: string                  // subsection body text (may contain HTML)
   image: string | null          // filename in /gallery/, or null

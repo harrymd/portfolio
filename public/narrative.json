@@ -3,6 +3,7 @@
     {
       "number": 1,
       "name": "Does your project need...",
+      "contents-name": "Services",
       "subsections": [
         {
           "number": 1,
@@ -33,6 +34,7 @@
     {
       "number": 2,
       "name": "Happy customers",
+      "contents-name": "Past clients",
       "subsections": [
         {
           "number": 5,
@@ -63,6 +65,7 @@
     {
       "number": 3,
       "name": "My other experience",
+      "contents-name": "My CV",
       "subsections": [
         {
           "number": 9,
@@ -93,6 +96,7 @@
     {
       "number": 4,
       "name": "Why Kuril Geospatial?",
+      "contents-name": "Why me?",
       "subsections": [
         {
           "number": 13,

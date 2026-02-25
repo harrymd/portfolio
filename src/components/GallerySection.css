@@ -118,6 +118,7 @@
 /* ── Extra sections (Pricing, Contact …) ─────────── */
 .gallery-extra-section {
   margin-top: 4rem;
+  max-width: 560px;
 }
 
 .gallery-filler-text {
@@ -150,6 +151,14 @@
   margin-bottom: 0.75rem;
 }
 
+/* ── Side-by-side table pair ─────────────────────── */
+.gallery-table-pair {
+  display: flex;
+  flex-direction: row;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
 /* ── Tables ──────────────────────────────────────── */
 .gallery-table-wrap {
   overflow-x: auto;
@@ -161,6 +170,15 @@
   font-family: var(--font-body);
   font-size: 0.9rem;
   min-width: 320px;
+}
+
+.gallery-table--narrow {
+  min-width: unset;
+}
+
+.gallery-subheading--minor {
+  font-size: 0.7rem;
+  margin-top: 0;
 }
 
 .gallery-table th {

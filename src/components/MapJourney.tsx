@@ -223,19 +223,19 @@ export default function MapJourney({ data }: Props) {
     const items: ProgressBarItem[] = []
     const seenSections = new Set<string>()
     for (const sp of innerPoints) {
-      if (!sp.sectionName) continue
-      const isFirst = !seenSections.has(sp.sectionName)
-      if (isFirst) seenSections.add(sp.sectionName)
+      if (!sp.sectionName || seenSections.has(sp.sectionName)) continue
+      seenSections.add(sp.sectionName)
       items.push({
-        id: `poi-${sp.narrativeId}`,
-        isLarge: isFirst,
-        label: sp.sectionName,
+        id: `section-${sp.narrativeId}`,
+        label: sp.contentsName || sp.sectionName,
         scrollPx: kmToPx(sp.distanceAlongPath, scrollMapping),
       })
     }
-    items.push({ id: 'pricing', isLarge: true, label: 'Pricing',
+    items.push({ id: 'gallery', label: 'Selected Work',
+      scrollPx: scrollMapping.totalPx, elementId: 'gallery-selected-work' })
+    items.push({ id: 'pricing', label: 'Pricing',
       scrollPx: scrollMapping.totalPx, elementId: 'gallery-pricing' })
-    items.push({ id: 'contact', isLarge: true, label: 'Contact',
+    items.push({ id: 'contact', label: 'Contact',
       scrollPx: scrollMapping.totalPx, elementId: 'gallery-contact' })
     return items
   }, [innerPoints, scrollMapping])
@@ -529,7 +529,6 @@ export default function MapJourney({ data }: Props) {
 
       <ProgressBar
         items={progressItems}
-        mapTotalPx={scrollMapping.totalPx}
         scrollerRef={scrollerRef}
         inGallery={inGallery}
       />
@@ -575,6 +574,9 @@ export default function MapJourney({ data }: Props) {
       <div className="scroll-overlay" ref={scrollerRef}>
         <div style={{ height: `${scrollMapping.totalPx}px` }} />
         <GallerySection />
+        {/* Last element in scroll content — prevents dark map showing through
+            when the browser rubber-bands past the bottom */}
+        <div className="gallery-bottom-buffer" aria-hidden="true" />
       </div>
 
       <div

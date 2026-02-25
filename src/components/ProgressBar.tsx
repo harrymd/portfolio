@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react'
 import './ProgressBar.css'
 
+// ─── Speed control ────────────────────────────────────────────────────────────
+// Duration (ms) per section crossed when clicking a contents item.
+// Total scroll time = CLICK_SCROLL_MS × |target section − current section|.
+// Increase this value to slow down navigation further.
+const CLICK_SCROLL_MS = 5000
+
 export interface ProgressBarItem {
   id: string
-  isLarge: boolean
   label: string
   scrollPx: number
   elementId?: string   // gallery items: scroll-to by DOM measurement
@@ -11,39 +16,41 @@ export interface ProgressBarItem {
 
 interface Props {
   items: ProgressBarItem[]
-  mapTotalPx: number
   scrollerRef: React.RefObject<HTMLDivElement | null>
   inGallery: boolean
 }
 
-function smoothScrollTo(el: HTMLElement, targetPx: number) {
+function smoothScrollTo(el: HTMLElement, targetPx: number, duration: number) {
   const start = el.scrollTop
   const dist  = targetPx - start
-  const dur   = 450
   const t0    = performance.now()
   const tick  = (now: number) => {
-    const t    = Math.min((now - t0) / dur, 1)
-    const ease = 1 - (1 - t) ** 3          // ease-out cubic
+    const t    = Math.min((now - t0) / duration, 1)
+    const ease = 1 - (1 - t) ** 3
     el.scrollTop = start + dist * ease
     if (t < 1) requestAnimationFrame(tick)
   }
   requestAnimationFrame(tick)
 }
 
-export default function ProgressBar({ items, mapTotalPx, scrollerRef, inGallery }: Props) {
+export default function ProgressBar({ items, scrollerRef, inGallery }: Props) {
+  const [open,       setOpen]       = useState(false)   // collapsed by default
   const [scrollTop,  setScrollTop]  = useState(0)
+  const [atBottom,   setAtBottom]   = useState(false)
   const [galleryPxs, setGalleryPxs] = useState<Record<string, number>>({})
 
-  // Mirror the scroller's scroll position
   useEffect(() => {
     const el = scrollerRef.current
     if (!el) return
-    const handler = () => setScrollTop(el.scrollTop)
+    const handler = () => {
+      setScrollTop(el.scrollTop)
+      // True when the user has scrolled to (or past) the very bottom
+      setAtBottom(el.scrollTop + el.clientHeight >= el.scrollHeight - 5)
+    }
     el.addEventListener('scroll', handler, { passive: true })
     return () => el.removeEventListener('scroll', handler)
   }, [scrollerRef])
 
-  // Measure gallery element positions after initial render
   useEffect(() => {
     const el = scrollerRef.current
     if (!el) return
@@ -53,7 +60,6 @@ export default function ProgressBar({ items, mapTotalPx, scrollerRef, inGallery 
         if (!item.elementId) continue
         const target = document.getElementById(item.elementId)
         if (target) {
-          // Position of element's top relative to scroll container's top
           pxs[item.elementId] =
             target.getBoundingClientRect().top +
             el.scrollTop -
@@ -66,17 +72,15 @@ export default function ProgressBar({ items, mapTotalPx, scrollerRef, inGallery 
     return () => clearTimeout(t)
   }, [items, scrollerRef])
 
-  // Effective scroll position for an item (gallery items use measured DOM position)
   const effectivePx = (item: ProgressBarItem): number =>
     item.elementId ? (galleryPxs[item.elementId] ?? Infinity) : item.scrollPx
 
-  // Active item: last item whose effective scroll position <= current scrollTop
-  const activeIndex = items.reduce(
-    (best, item, i) => (scrollTop >= effectivePx(item) ? i : best),
-    0,
-  )
+  // If at the very bottom of the page, force the last item active
+  const activeIndex = atBottom
+    ? items.length - 1
+    : items.reduce((best, item, i) => (scrollTop >= effectivePx(item) ? i : best), 0)
 
-  const handleClick = (item: ProgressBarItem) => {
+  const handleClick = (item: ProgressBarItem, idx: number) => {
     const el = scrollerRef.current
     if (!el) return
     let targetPx: number
@@ -92,56 +96,59 @@ export default function ProgressBar({ items, mapTotalPx, scrollerRef, inGallery 
     } else {
       targetPx = item.scrollPx
     }
-    smoothScrollTo(el, targetPx)
+    const sections = Math.max(Math.abs(idx - activeIndex), 1)
+    smoothScrollTo(el, targetPx, sections * CLICK_SCROLL_MS)
   }
-
-  const galleryItems = items.filter(i => !!i.elementId)
-
-  // Vertical position (0–100%) within the progress bar container
-  const topPct = (item: ProgressBarItem): number => {
-    if (item.elementId) {
-      const gi = galleryItems.indexOf(item)
-      return 87 + gi * 8   // Pricing at 87%, Contact at 95%
-    }
-    return (item.scrollPx / mapTotalPx) * 80
-  }
-
-  const fillPct = topPct(items[activeIndex] ?? items[0])
 
   return (
     <nav
-      className={`progress-bar${inGallery ? ' progress-bar--gallery' : ''}`}
-      aria-label="Journey progress"
+      className={[
+        'progress-bar',
+        open ? 'progress-bar--open' : 'progress-bar--closed',
+        inGallery ? 'progress-bar--gallery' : '',
+      ].filter(Boolean).join(' ')}
+      aria-label="Contents"
     >
-      {/* Vertical track */}
-      <div className="pb-track">
-        <div className="pb-track-fill" style={{ height: `${fillPct}%` }} />
+      {/* Clickable title strip — toggles open/closed */}
+      <div
+        className="pb-title-strip"
+        onClick={() => setOpen(o => !o)}
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        title={open ? 'Collapse contents' : 'Expand contents'}
+        onKeyDown={(e) => e.key === 'Enter' && setOpen(o => !o)}
+      >
+        <span className="pb-title">Contents</span>
+        <span className="pb-chevron" aria-hidden="true">{open ? '‹' : '›'}</span>
       </div>
 
-      {items.map((item, idx) => {
-        const isActive = idx === activeIndex
-        const isPassed = !isActive && scrollTop >= effectivePx(item)
-        return (
-          <div
-            key={item.id}
-            className={[
-              'pb-item',
-              item.isLarge ? 'pb-item--large' : 'pb-item--small',
-              isActive  ? 'pb-item--active' : '',
-              isPassed  ? 'pb-item--passed' : '',
-            ].filter(Boolean).join(' ')}
-            style={{ top: `${topPct(item)}%` }}
-            onClick={() => handleClick(item)}
-            title={item.label}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && handleClick(item)}
-          >
-            <div className="pb-dot" />
-            {item.isLarge && <span className="pb-label">{item.label}</span>}
-          </div>
-        )
-      })}
+      {/* Nav items, evenly spaced — hidden when collapsed */}
+      <div className="pb-items">
+        <div className="pb-track" aria-hidden="true" />
+        {items.map((item, idx) => {
+          const isActive = idx === activeIndex
+          const isPassed = !isActive && scrollTop >= effectivePx(item)
+          return (
+            <div
+              key={item.id}
+              className={[
+                'pb-item',
+                isActive ? 'pb-item--active' : '',
+                isPassed ? 'pb-item--passed' : '',
+              ].filter(Boolean).join(' ')}
+              onClick={() => handleClick(item, idx)}
+              title={item.label}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && handleClick(item, idx)}
+            >
+              <div className="pb-dot" />
+              <span className="pb-label">{item.label}</span>
+            </div>
+          )
+        })}
+      </div>
     </nav>
   )
 }

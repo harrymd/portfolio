@@ -1,55 +1,113 @@
-/* ── Container ────────────────────────────────────────────────────────────── */
+/* ── Outer box ────────────────────────────────────────────────────────────── */
+/* Matches the POI panel surface/border variables */
 .progress-bar {
   position: fixed;
   left: 0;
-  top: 3.5rem;
-  bottom: 2rem;
-  width: 170px;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 10;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
+
+  display: flex;
+  flex-direction: row;
+
+  background: var(--color-surface);          /* rgba(11, 15, 20, 0.85) */
+  border: 1px solid var(--color-border);     /* rgba(224, 48, 48, 0.25) */
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-/* ── Vertical track ───────────────────────────────────────────────────────── */
+/* ── Collapsed state — hide items column ──────────────────────────────────── */
+.progress-bar--closed .pb-items {
+  display: none;
+}
+
+/* ── "Contents" title strip ───────────────────────────────────────────────── */
+.pb-title-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.75rem 0.5rem;
+  border-right: 1px solid var(--color-border);
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pb-title {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);    /* text reads bottom-to-top */
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* ── Chevron ──────────────────────────────────────────────────────────────── */
+.pb-chevron {
+  font-size: 0.9rem;
+  color: var(--color-accent);
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.pb-title-strip:hover .pb-chevron {
+  color: var(--color-text);
+}
+
+/* ── Items column ─────────────────────────────────────────────────────────── */
+.pb-items {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  /* padding: top right bottom left */
+  /* left-side gap before dots; right-side gap after labels */
+  padding: 1.25rem 1.5rem 1.25rem 0;
+  min-height: 230px;
+}
+
+/* Static vertical track line (manually centred behind dots) */
 .pb-track {
   position: absolute;
-  left: 8px;
-  top: 0;
-  bottom: 0;
+  /* 0.85rem padding-left on pb-item + 9px dot / 2 = dot centre */
+  left: calc(0.85rem + 4.5px);
+  top: 1.25rem;
+  bottom: 1.25rem;
   width: 1px;
-  background: rgba(255, 255, 255, 0.15);
-  transition: background 0.5s ease;
+  background: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
 }
 
-.pb-track-fill {
-  width: 100%;
-  background: var(--color-accent);
-  opacity: 0.7;
-  transition: height 0.2s linear;
-}
-
-/* ── Items ────────────────────────────────────────────────────────────────── */
+/* ── Individual items ─────────────────────────────────────────────────────── */
 .pb-item {
-  position: absolute;
-  left: 0;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  transform: translateY(-50%);
+  gap: 0.65rem;
+  padding-left: 0.85rem;
   cursor: pointer;
-  pointer-events: auto;
+  transition: opacity 0.2s ease;
+}
+
+.pb-item:hover {
+  opacity: 0.8;
 }
 
 /* ── Dots ─────────────────────────────────────────────────────────────────── */
 .pb-dot {
   flex-shrink: 0;
-  width: 5px;
-  height: 5px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  /* Center the dot on the track (track at left: 8px) */
-  margin-left: 5.5px;
   background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   transition:
     background   0.35s ease,
     border-color 0.35s ease,
@@ -57,88 +115,55 @@
     transform    0.25s ease;
 }
 
-.pb-item--large .pb-dot {
-  width: 9px;
-  height: 9px;
-  margin-left: 3.5px;   /* center 9px dot on track at x=8 */
-}
-
 .pb-item--active .pb-dot {
   background: var(--color-accent) !important;
   border-color: var(--color-accent) !important;
   box-shadow: 0 0 8px rgba(224, 48, 48, 0.65);
-  transform: scale(1.25);
+  transform: scale(1.2);
 }
 
 .pb-item--passed .pb-dot {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.55);
 }
 
 .pb-item:hover .pb-dot {
-  background: rgba(224, 48, 48, 0.8) !important;
+  background: rgba(224, 48, 48, 0.7) !important;
   border-color: var(--color-accent) !important;
 }
 
-/* ── Labels (large dots only) ────────────────────────────────────────────── */
+/* ── Labels ───────────────────────────────────────────────────────────────── */
 .pb-label {
   font-family: var(--font-body);
-  font-size: 0.58rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.7);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
   white-space: nowrap;
   pointer-events: none;
   line-height: 1;
-  transition: color 0.35s ease, text-shadow 0.35s ease;
+  transition: color 0.35s ease;
+}
+
+.pb-item--active .pb-label {
+  color: var(--color-text);
+  font-weight: 500;
 }
 
 .pb-item:hover .pb-label {
-  color: rgba(255, 255, 255, 1);
+  color: #ffffff;
 }
 
-/* ── Gallery mode (light background) ─────────────────────────────────────── */
-.progress-bar--gallery .pb-track {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-.progress-bar--gallery .pb-dot {
-  background: rgba(55, 65, 81, 0.15);
-  border-color: rgba(55, 65, 81, 0.3);
-}
-
-.progress-bar--gallery .pb-item--passed .pb-dot {
-  background: rgba(55, 65, 81, 0.45);
-  border-color: rgba(55, 65, 81, 0.45);
-}
-
-.progress-bar--gallery .pb-item--active .pb-dot {
-  background: var(--color-accent) !important;
-  border-color: var(--color-accent) !important;
-}
-
-.progress-bar--gallery .pb-item:hover .pb-dot {
-  background: rgba(224, 48, 48, 0.8) !important;
-  border-color: var(--color-accent) !important;
-}
-
-.progress-bar--gallery .pb-label {
-  color: #374151;
-  text-shadow: none;
-}
-
-.progress-bar--gallery .pb-item:hover .pb-label {
-  color: #111827;
-}
-
-/* ── Separator between map and gallery sections ───────────────────────────── */
-/* Visual gap in the track between 80% and 87% handled by dot-only regions */
-
-/* ── Mobile: dots only, no labels ────────────────────────────────────────── */
+/* ── Mobile: reposition to top-quarter, hide labels ─────────────────────── */
 @media (max-width: 767px) {
   .progress-bar {
-    width: 22px;
+    top: 25%;
+    transform: translateY(-25%);
+  }
+
+  .pb-items {
+    padding: 1rem 0.75rem 1rem 0;
+    min-height: 180px;
   }
 
   .pb-label {
