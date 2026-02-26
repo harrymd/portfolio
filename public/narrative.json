@@ -100,7 +100,7 @@
           "number": 12,
           "name": "More skills",
       	  "contents-name": "Full CV",
-          "text": "See my <a href = '/public/cv_hrmd.pdf' target='_blank'>full CV</a> for other skills: programming and GIS tools, spoken languages, teaching, writing, and even long-distance hiking, if you need trail maps...",
+          "text": "See my <a href = 'cv_hrmd.pdf' target='_blank'>full CV</a> for other skills: programming and GIS tools, spoken languages, teaching, writing, and even long-distance hiking, if you need trail maps...",
           "image": null
         }
       ]
