@@ -74,8 +74,11 @@ export default function ProgressBar({ items, scrollerRef, inGallery, onNavigate,
   // Visible items: section headers + gallery items always; subsections only for active section
   const visibleItems = items.filter(item => !item.parentId || item.parentId === activeSectionId)
 
-  // Active index within visible items
-  const activeIndex = atBottom
+  // Active index within visible items.
+  // atBottom only forces last-item when in gallery; during the journey it can
+  // fire transiently on navigation jumps before scrollHeight settles, which
+  // would incorrectly highlight the last subsection.
+  const activeIndex = atBottom && inGallery
     ? visibleItems.length - 1
     : visibleItems.reduce((best, item, i) => (ST >= effectivePx(item) ? i : best), 0)
 

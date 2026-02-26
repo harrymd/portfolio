@@ -172,6 +172,20 @@
   .poi-panel--visible {
     transform: translateX(-50%) translateY(0);
   }
+
+  /* Smoothly collapse detail to zero height when between subsections,
+     leaving only the section heading visible. */
+  .poi-panel-detail {
+    max-height: 0;
+    overflow: hidden;
+    transition:
+      opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .poi-panel-detail--visible {
+    max-height: 600px;
+  }
 }
 
 /* ── Panel sections ──────────────────────────────── */
@@ -360,9 +374,10 @@
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  color: #64748b;
+  color: #374151;
   font-family: var(--font-body);
-  font-size: 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   pointer-events: none;
@@ -370,7 +385,7 @@
 }
 
 .scroll-hint-sub {
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: none;
   opacity: 0.8;

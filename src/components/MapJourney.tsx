@@ -38,7 +38,7 @@ interface ScrollMapping {
 
 // dwellPoints: the subset of points that trigger the slow-scroll zone.
 // Pass innerPoints so the start and end markers are excluded.
-function buildScrollMapping(snappedPoints: SnappedPoint[], dwellPoints: SnappedPoint[]): ScrollMapping {
+function buildScrollMapping(snappedPoints: SnappedPoint[], dwellPoints: SnappedPoint[], pxPerKm = BASE_PX_PER_KM): ScrollMapping {
   if (snappedPoints.length === 0) return { kmSamples: [], pxCumulative: [], totalPx: 0 }
 
   const startKm  = snappedPoints[0].distanceAlongPath
@@ -67,11 +67,11 @@ function buildScrollMapping(snappedPoints: SnappedPoint[], dwellPoints: SnappedP
           break
         }
       }
-      cumPx += segKm * BASE_PX_PER_KM * (inSlowZone ? SLOW_FACTOR : 1)
+      cumPx += segKm * pxPerKm * (inSlowZone ? SLOW_FACTOR : 1)
     }
   }
 
-  const totalPx = cumPx + BASE_PX_PER_KM * 0.5
+  const totalPx = cumPx + pxPerKm * 0.5
   return { kmSamples, pxCumulative, totalPx }
 }
 
@@ -226,7 +226,8 @@ export default function MapJourney({ data }: Props) {
 
   const scrollMapping = useMemo(() => {
     const dwell = snappedPoints.length > 2 ? snappedPoints.slice(1, -1) : snappedPoints
-    return buildScrollMapping(snappedPoints, dwell)
+    const pxPerKm = window.innerWidth < MOBILE_BREAKPOINT ? BASE_PX_PER_KM / 3 : BASE_PX_PER_KM
+    return buildScrollMapping(snappedPoints, dwell, pxPerKm)
   }, [snappedPoints])
 
   const progressItems = useMemo((): ProgressBarItem[] => {
@@ -579,7 +580,7 @@ export default function MapJourney({ data }: Props) {
         scrollerRef={scrollerRef}
         inGallery={inGallery}
         onNavigate={handleNavigate}
-        onOpenChange={(open) => { progressBarOpenRef.current = open }}
+        onOpenChange={(open) => { progressBarOpenRef.current = open; handleScroll() }}
       />
 
       <header className={`journey-header${inGallery ? ' journey-header--hidden' : ''}`}>
