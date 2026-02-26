@@ -580,15 +580,17 @@ export default function MapJourney({ data }: Props) {
       />
 
       <header className={`journey-header${inGallery ? ' journey-header--hidden' : ''}`}>
-        <div className="journey-header-left">
-          <img
-            className="journey-logo"
-            src={`${import.meta.env.BASE_URL}kuril_logo_basic.svg`}
-            alt=""
-            aria-hidden="true"
-          />
-          <h1 className="journey-heading">Kuril Geospatial</h1>
-        </div>
+        <h1 className="journey-heading">
+          <span className="journey-k-wrap">
+            <span className="journey-k-char">K</span>
+            <img
+              className="journey-k-logo"
+              src={`${import.meta.env.BASE_URL}kuril_logo_basic.svg`}
+              alt=""
+              aria-hidden="true"
+            />
+          </span>uril Geospatial
+        </h1>
         <div className="journey-contact">
           Contact Harry:<br />
           <a href="mailto:projects@HKuril.com">projects@HKuril.com</a>

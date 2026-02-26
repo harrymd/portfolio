@@ -57,26 +57,25 @@
   pointer-events: none !important;
 }
 
-/* Header: title + logo grouped on the left */
-.journey-header-left {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
+/* K-as-logo: invisible K reserves layout space; logo overlaid on top */
+.journey-k-wrap {
+  position: relative;
+  display: inline-block;
+  margin-right: 0.1rem;
 }
 
-.journey-logo {
-  height: 2.2rem;
+.journey-k-char {
+  opacity: 0;
+}
+
+.journey-k-logo {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 0.92em;
   width: auto;
-  flex-shrink: 0;
-  /* Force any dark SVG shapes to the accent red */
-  filter: brightness(0) saturate(100%) invert(22%) sepia(96%) saturate(2500%)
-          hue-rotate(340deg) brightness(95%);
-}
-
-@media (max-width: 767px) {
-  .journey-logo {
-    display: none;
-  }
+  filter: drop-shadow(2px 2px 0px #374151);
 }
 
 /* Single consistent Pixelify Sans title, linearly scaled 25px→50px */
@@ -151,6 +150,9 @@
 @media (max-width: 767px) {
   .journey-heading {
     text-shadow: 1px 1px 0px #374151;
+  }
+  .journey-k-logo {
+    filter: drop-shadow(1px 1px 0px #374151);
   }
 }
 
