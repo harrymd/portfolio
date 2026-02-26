@@ -14,9 +14,10 @@ interface Props {
   scrollerRef: React.RefObject<HTMLDivElement | null>
   inGallery: boolean
   onNavigate: (scrollPx: number) => void
+  onOpenChange?: (open: boolean) => void
 }
 
-export default function ProgressBar({ items, scrollerRef, inGallery, onNavigate }: Props) {
+export default function ProgressBar({ items, scrollerRef, inGallery, onNavigate, onOpenChange }: Props) {
   const [open,       setOpen]       = useState(false)
   const [scrollTop,  setScrollTop]  = useState(0)
   const [atBottom,   setAtBottom]   = useState(false)
@@ -109,12 +110,12 @@ export default function ProgressBar({ items, scrollerRef, inGallery, onNavigate 
       {/* Clickable title strip — toggles open/closed */}
       <div
         className="pb-title-strip"
-        onClick={() => setOpen(o => !o)}
+        onClick={() => setOpen(o => { const next = !o; onOpenChange?.(next); return next })}
         role="button"
         tabIndex={0}
         aria-expanded={open}
         title={open ? 'Collapse contents' : 'Expand contents'}
-        onKeyDown={(e) => e.key === 'Enter' && setOpen(o => !o)}
+        onKeyDown={(e) => e.key === 'Enter' && setOpen(o => { const next = !o; onOpenChange?.(next); return next })}
       >
         <span className="pb-title">Contents</span>
         <span className="pb-chevron" aria-hidden="true">{open ? '‹' : '›'}</span>

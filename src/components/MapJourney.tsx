@@ -168,13 +168,14 @@ function makeCursorArrow(): { width: number; height: number; data: Uint8Array } 
 // Component
 // ─────────────────────────────────────────────────────────────────────────────
 export default function MapJourney({ data }: Props) {
-  const mapContainerRef = useRef<HTMLDivElement>(null)
-  const mapRef          = useRef<maplibregl.Map | null>(null)
-  const scrollerRef     = useRef<HTMLDivElement>(null)
-  const rafRef          = useRef<number | null>(null)
-  const detailTimerRef  = useRef<number | null>(null)
-  const idleTimerRef    = useRef<number | null>(null)
-  const navTimerRef     = useRef<number | null>(null)
+  const mapContainerRef      = useRef<HTMLDivElement>(null)
+  const mapRef               = useRef<maplibregl.Map | null>(null)
+  const scrollerRef          = useRef<HTMLDivElement>(null)
+  const rafRef               = useRef<number | null>(null)
+  const detailTimerRef       = useRef<number | null>(null)
+  const idleTimerRef         = useRef<number | null>(null)
+  const navTimerRef          = useRef<number | null>(null)
+  const progressBarOpenRef   = useRef(false)
 
   const [mapReady, setMapReady]             = useState(false)
   const [activePoiIndex, setActivePoiIndex] = useState<number | null>(null)
@@ -312,7 +313,8 @@ export default function MapJourney({ data }: Props) {
     const center    = kmToLngLat(km)
 
     const isMobile = window.innerWidth < MOBILE_BREAKPOINT
-    const offset: [number, number] = isMobile ? [0, -window.innerHeight / 4] : [0, 0]
+    const xOffset  = isMobile && progressBarOpenRef.current ? window.innerWidth * 0.2 : 0
+    const offset: [number, number] = isMobile ? [xOffset, -window.innerHeight / 4] : [0, 0]
 
     map.easeTo({ center, zoom: FIXED_ZOOM, bearing: FIXED_BEARING, duration: 100, easing: (t) => t, offset })
 
@@ -577,6 +579,7 @@ export default function MapJourney({ data }: Props) {
         scrollerRef={scrollerRef}
         inGallery={inGallery}
         onNavigate={handleNavigate}
+        onOpenChange={(open) => { progressBarOpenRef.current = open }}
       />
 
       <header className={`journey-header${inGallery ? ' journey-header--hidden' : ''}`}>

@@ -173,7 +173,7 @@
   color: var(--color-text);
 }
 
-/* ── Mobile: reposition to top-quarter, hide labels ─────────────────────── */
+/* ── Mobile: reposition to top-quarter, show labels at slightly larger size ── */
 @media (max-width: 767px) {
   .progress-bar {
     top: 25%;
@@ -181,11 +181,15 @@
   }
 
   .pb-items {
-    padding: 1rem 0.75rem 1rem 0;
+    padding: 1rem 1rem 1rem 0;
     min-height: 180px;
   }
 
   .pb-label {
-    display: none;
+    font-size: 0.82rem;
+  }
+
+  .pb-item--sub .pb-label {
+    font-size: 0.74rem;
   }
 }
