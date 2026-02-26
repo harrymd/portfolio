@@ -36,7 +36,9 @@ interface ScrollMapping {
   totalPx: number
 }
 
-function buildScrollMapping(snappedPoints: SnappedPoint[]): ScrollMapping {
+// dwellPoints: the subset of points that trigger the slow-scroll zone.
+// Pass innerPoints so the start and end markers are excluded.
+function buildScrollMapping(snappedPoints: SnappedPoint[], dwellPoints: SnappedPoint[]): ScrollMapping {
   if (snappedPoints.length === 0) return { kmSamples: [], pxCumulative: [], totalPx: 0 }
 
   const startKm  = snappedPoints[0].distanceAlongPath
@@ -59,7 +61,7 @@ function buildScrollMapping(snappedPoints: SnappedPoint[]): ScrollMapping {
       const segKm  = nextKm - km
 
       let inSlowZone = false
-      for (const sp of snappedPoints) {
+      for (const sp of dwellPoints) {
         if (Math.abs(midKm - sp.distanceAlongPath) <= POI_WINDOW_KM) {
           inSlowZone = true
           break
@@ -172,6 +174,7 @@ export default function MapJourney({ data }: Props) {
   const rafRef          = useRef<number | null>(null)
   const detailTimerRef  = useRef<number | null>(null)
   const idleTimerRef    = useRef<number | null>(null)
+  const navTimerRef     = useRef<number | null>(null)
 
   const [mapReady, setMapReady]             = useState(false)
   const [activePoiIndex, setActivePoiIndex] = useState<number | null>(null)
@@ -179,6 +182,9 @@ export default function MapJourney({ data }: Props) {
   const [sectionVisible, setSectionVisible] = useState(false)
   const [scrollHintVisible, setScrollHintVisible] = useState(true)
   const [inGallery, setInGallery]           = useState(false)
+  const [navFading, setNavFading]           = useState(false)
+  const [scrollTopState, setScrollTopState] = useState(0)
+  const [contentsHintDismissed, setContentsHintDismissed] = useState(false)
 
   // Cross-fade states
   const [displayedPoi, setDisplayedPoi]   = useState<SnappedPoint | null>(null)
@@ -217,19 +223,36 @@ export default function MapJourney({ data }: Props) {
     return ranges
   }, [innerPoints])
 
-  const scrollMapping = useMemo(() => buildScrollMapping(snappedPoints), [snappedPoints])
+  const scrollMapping = useMemo(() => {
+    const dwell = snappedPoints.length > 2 ? snappedPoints.slice(1, -1) : snappedPoints
+    return buildScrollMapping(snappedPoints, dwell)
+  }, [snappedPoints])
 
   const progressItems = useMemo((): ProgressBarItem[] => {
     const items: ProgressBarItem[] = []
-    const seenSections = new Set<string>()
+    let currentSectionId = ''
+    let lastSectionName  = ''
     for (const sp of innerPoints) {
-      if (!sp.sectionName || seenSections.has(sp.sectionName)) continue
-      seenSections.add(sp.sectionName)
-      items.push({
-        id: `section-${sp.narrativeId}`,
-        label: sp.contentsName || sp.sectionName,
-        scrollPx: kmToPx(sp.distanceAlongPath, scrollMapping),
-      })
+      if (!sp.sectionName) continue
+      // New section: emit section header
+      if (sp.sectionName !== lastSectionName) {
+        lastSectionName  = sp.sectionName
+        currentSectionId = `section-${sp.narrativeId}`
+        items.push({
+          id: currentSectionId,
+          label: sp.contentsName || sp.sectionName,
+          scrollPx: kmToPx(sp.distanceAlongPath, scrollMapping),
+        })
+      }
+      // Always emit subsection (indented under parent section)
+      if (sp.subsectionName) {
+        items.push({
+          id: `sub-${sp.narrativeId}`,
+          label: sp.subsectionContentsName || sp.subsectionName,
+          scrollPx: kmToPx(sp.distanceAlongPath, scrollMapping),
+          parentId: currentSectionId,
+        })
+      }
     }
     items.push({ id: 'gallery', label: 'Selected work',
       scrollPx: scrollMapping.totalPx, elementId: 'gallery-selected-work' })
@@ -260,6 +283,19 @@ export default function MapJourney({ data }: Props) {
     [pathLine, data.totalDistance],
   )
 
+  // Fade-transition navigation: overlay fades in → instant scroll jump → overlay fades out
+  const handleNavigate = useCallback((targetPx: number) => {
+    const el = scrollerRef.current
+    if (!el) return
+    if (navTimerRef.current !== null) clearTimeout(navTimerRef.current)
+    setNavFading(true)
+    navTimerRef.current = window.setTimeout(() => {
+      el.scrollTop = targetPx
+      setNavFading(false)
+      navTimerRef.current = null
+    }, 300)
+  }, [])
+
   const handleScroll = useCallback(() => {
     const scroller = scrollerRef.current
     const map      = mapRef.current
@@ -269,6 +305,7 @@ export default function MapJourney({ data }: Props) {
     const scrollRangePx = scrollMapping.totalPx
     const galleryThreshold = Math.max(0, scrollRangePx - GALLERY_FADE_PX)
     setInGallery(scrollTop >= galleryThreshold)
+    setScrollTopState(scrollTop)
 
     const clampedPx = Math.min(scrollTop, scrollRangePx)
     const km        = scrollPxToKm(clampedPx, scrollMapping)
@@ -516,6 +553,11 @@ export default function MapJourney({ data }: Props) {
   // Panel outer box: visible while km is inside a section's range, or during fade
   const panelVisible = sectionVisible || detailVisible
 
+  // Contents hint: show after first POI, hide after second POI or when dismissed
+  const firstPoiPx  = innerPoints.length > 0 ? kmToPx(innerPoints[0].distanceAlongPath, scrollMapping) : 0
+  const secondPoiPx = innerPoints.length > 1 ? kmToPx(innerPoints[1].distanceAlongPath, scrollMapping) : Infinity
+  const contentsHintVisible = !contentsHintDismissed && scrollTopState > firstPoiPx && scrollTopState < secondPoiPx
+
   return (
     <div className="journey-root">
       {/* Dark overlay that fades out once the map+PMTiles tiles have rendered */}
@@ -525,16 +567,28 @@ export default function MapJourney({ data }: Props) {
         aria-hidden="true"
       />
 
+      {/* Full-screen overlay for contents-bar fade transition */}
+      <div className={`nav-overlay${navFading ? ' nav-overlay--fading' : ''}`} aria-hidden="true" />
+
       <div className="map-container" ref={mapContainerRef} />
 
       <ProgressBar
         items={progressItems}
         scrollerRef={scrollerRef}
         inGallery={inGallery}
+        onNavigate={handleNavigate}
       />
 
       <header className={`journey-header${inGallery ? ' journey-header--hidden' : ''}`}>
-        <h1 className="journey-heading">Kuril Geospatial</h1>
+        <div className="journey-header-left">
+          <img
+            className="journey-logo"
+            src={`${import.meta.env.BASE_URL}kuril_logo_basic.svg`}
+            alt=""
+            aria-hidden="true"
+          />
+          <h1 className="journey-heading">Kuril Geospatial</h1>
+        </div>
         <div className="journey-contact">
           Contact Harry:<br />
           <a href="mailto:projects@HKuril.com">projects@HKuril.com</a>
@@ -583,6 +637,17 @@ export default function MapJourney({ data }: Props) {
         className={`gallery-bottom-buffer${inGallery ? ' gallery-bottom-buffer--visible' : ''}`}
         aria-hidden="true"
       />
+
+      {contentsHintVisible && (
+        <div className="contents-hint" role="status">
+          <span>Tired of scrolling? Use the contents bar</span>
+          <button
+            className="contents-hint-dismiss"
+            onClick={() => setContentsHintDismissed(true)}
+            aria-label="Dismiss hint"
+          >×</button>
+        </div>
+      )}
 
       <div
         className={`scroll-hint${scrollHintVisible ? '' : ' scroll-hint--hidden'}`}

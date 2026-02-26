@@ -31,6 +31,14 @@
   padding: 2rem;
 }
 
+.loading-logo {
+  width: 72px;
+  height: 72px;
+  /* Force any dark SVG shapes to the accent red */
+  filter: brightness(0) saturate(100%) invert(22%) sepia(96%) saturate(2500%)
+          hue-rotate(340deg) brightness(95%);
+}
+
 .loading-title {
   font-family: var(--font-display);
   font-size: clamp(2rem, 6vw, 3.5rem);

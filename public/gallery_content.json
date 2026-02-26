@@ -59,7 +59,7 @@
     "id": "tct",
     "image_file": "tct.png",
     "title": "Transcaucasian Trail Maps",
-    "description": "As a personal project, I built an <a href = 'https://hkuril.com/html/en/articles/2023_tct/tct_route.html' target = '_blank'>interactive map</a> of the <a href = '' target = '_blank'>Transcaucasian Trail</a>, a long-distance walking route which crosses Armenia and Georgia, as well as a live Garmin satellite tracker map.",
+    "description": "As a personal project, I built an <a href = 'https://hkuril.com/html/en/articles/2023_tct/tct_route.html' target = '_blank'>interactive map</a> of the <a href = '' target = '_blank'>Transcaucasian Trail</a> (TCT), a long-distance walking route which crosses Armenia and Georgia, as well as a live Garmin satellite tracker map. I’m on the TCT Association <a href = 'https://transcaucasiantrail.org/en/about/team/'>Hikers’ Board</a> where I help with GIS, trail notes, and other aspects of trail development.",
     "tools": ["Leaflet", "Folium", "Protomaps (PMTiles)"]
   },
   {

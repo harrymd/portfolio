@@ -22,6 +22,7 @@ export interface SnappedPoint {
   sectionName: string           // parent section name from narrative
   contentsName: string          // short section name from narrative 'contents-name'
   subsectionName: string        // subsection name from narrative
+  subsectionContentsName: string // short label for contents pane ('contents-name' or subsectionName)
   text: string                  // subsection body text (may contain HTML)
   image: string | null          // filename in /gallery/, or null
   snappedCoord: [number, number]

@@ -66,18 +66,22 @@ export default function LoadingScreen({ onLoaded }: Props) {
           sectionName: string
           contentsName: string
           subsectionName: string
+          subsectionContentsName: string
           text: string
           image: string | null
         }
         const narrativeLookup = new Map<number, NarrativeLookup>()
         for (const section of narrativeRaw.sections) {
-          const contentsName =
-            (section as unknown as Record<string, unknown>)['contents-name'] as string ?? section.name
+          const raw = section as unknown as Record<string, unknown>
+          const contentsName = raw['contents-name'] as string ?? section.name
           for (const sub of section.subsections) {
+            const subRaw = sub as unknown as Record<string, unknown>
+            const subsectionContentsName = subRaw['contents-name'] as string ?? sub.name
             narrativeLookup.set(sub.number, {
               sectionName: section.name,
               contentsName,
               subsectionName: sub.name,
+              subsectionContentsName,
               text: sub.text,
               image: sub.image,
             })
@@ -110,6 +114,7 @@ export default function LoadingScreen({ onLoaded }: Props) {
             sectionName: narrative?.sectionName ?? '',
             contentsName: narrative?.contentsName ?? '',
             subsectionName: narrative?.subsectionName ?? '',
+            subsectionContentsName: narrative?.subsectionContentsName ?? '',
             text: narrative?.text ?? '',
             image: narrative?.image ?? null,
             snappedCoord,
@@ -142,6 +147,12 @@ export default function LoadingScreen({ onLoaded }: Props) {
   return (
     <div className="loading-screen">
       <div className="loading-content">
+        <img
+          className="loading-logo"
+          src={`${import.meta.env.BASE_URL}kuril_logo_basic.svg`}
+          alt=""
+          aria-hidden="true"
+        />
         <h1 className={`loading-title${fontReady ? ' loading-title--visible' : ''}`}>
           Kuril Geospatial
         </h1>

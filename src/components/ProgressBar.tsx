@@ -1,40 +1,23 @@
 import { useEffect, useState } from 'react'
 import './ProgressBar.css'
 
-// ─── Speed control ────────────────────────────────────────────────────────────
-// Duration (ms) per section crossed when clicking a contents item.
-// Total scroll time = CLICK_SCROLL_MS × |target section − current section|.
-// Increase this value to slow down navigation further.
-const CLICK_SCROLL_MS = 3000
-
 export interface ProgressBarItem {
   id: string
   label: string
   scrollPx: number
-  elementId?: string   // gallery items: scroll-to by DOM measurement
+  elementId?: string  // gallery items: scroll-to by DOM measurement
+  parentId?: string   // subsection items: id of parent section item
 }
 
 interface Props {
   items: ProgressBarItem[]
   scrollerRef: React.RefObject<HTMLDivElement | null>
   inGallery: boolean
+  onNavigate: (scrollPx: number) => void
 }
 
-function smoothScrollTo(el: HTMLElement, targetPx: number, duration: number) {
-  const start = el.scrollTop
-  const dist  = targetPx - start
-  const t0    = performance.now()
-  const tick  = (now: number) => {
-    const t    = Math.min((now - t0) / duration, 1)
-    const ease = 1 - (1 - t) ** 3
-    el.scrollTop = start + dist * ease
-    if (t < 1) requestAnimationFrame(tick)
-  }
-  requestAnimationFrame(tick)
-}
-
-export default function ProgressBar({ items, scrollerRef, inGallery }: Props) {
-  const [open,       setOpen]       = useState(false)   // collapsed by default
+export default function ProgressBar({ items, scrollerRef, inGallery, onNavigate }: Props) {
+  const [open,       setOpen]       = useState(false)
   const [scrollTop,  setScrollTop]  = useState(0)
   const [atBottom,   setAtBottom]   = useState(false)
   const [galleryPxs, setGalleryPxs] = useState<Record<string, number>>({})
@@ -44,13 +27,13 @@ export default function ProgressBar({ items, scrollerRef, inGallery }: Props) {
     if (!el) return
     const handler = () => {
       setScrollTop(el.scrollTop)
-      // True when the user has scrolled to (or past) the very bottom
       setAtBottom(el.scrollTop + el.clientHeight >= el.scrollHeight - 5)
     }
     el.addEventListener('scroll', handler, { passive: true })
     return () => el.removeEventListener('scroll', handler)
   }, [scrollerRef])
 
+  // Measure gallery element positions after initial render
   useEffect(() => {
     const el = scrollerRef.current
     if (!el) return
@@ -75,12 +58,27 @@ export default function ProgressBar({ items, scrollerRef, inGallery }: Props) {
   const effectivePx = (item: ProgressBarItem): number =>
     item.elementId ? (galleryPxs[item.elementId] ?? Infinity) : item.scrollPx
 
-  // If at the very bottom of the page, force the last item active
-  const activeIndex = atBottom
-    ? items.length - 1
-    : items.reduce((best, item, i) => (scrollTop >= effectivePx(item) ? i : best), 0)
+  // +1px epsilon compensates for browsers truncating el.scrollTop to integer pixels.
+  // Without it, navigating to a float scrollPx (e.g. 15234.6) lands at 15234,
+  // and 15234 >= 15234.6 is false — the item and its section fail their checks.
+  const ST = scrollTop + 1
 
-  const handleClick = (item: ProgressBarItem, idx: number) => {
+  // Active section: last section header (no parentId, no elementId) whose scrollPx has been passed
+  const sectionHeaders = items.filter(i => !i.parentId && !i.elementId)
+  const activeSectionId = sectionHeaders.reduce(
+    (best, item) => (ST >= item.scrollPx ? item.id : best),
+    sectionHeaders[0]?.id ?? '',
+  )
+
+  // Visible items: section headers + gallery items always; subsections only for active section
+  const visibleItems = items.filter(item => !item.parentId || item.parentId === activeSectionId)
+
+  // Active index within visible items
+  const activeIndex = atBottom
+    ? visibleItems.length - 1
+    : visibleItems.reduce((best, item, i) => (ST >= effectivePx(item) ? i : best), 0)
+
+  const handleClick = (item: ProgressBarItem) => {
     const el = scrollerRef.current
     if (!el) return
     let targetPx: number
@@ -96,8 +94,7 @@ export default function ProgressBar({ items, scrollerRef, inGallery }: Props) {
     } else {
       targetPx = item.scrollPx
     }
-    const sections = Math.max(Math.abs(idx - activeIndex), 1)
-    smoothScrollTo(el, targetPx, sections * CLICK_SCROLL_MS)
+    onNavigate(targetPx)
   }
 
   return (
@@ -123,25 +120,26 @@ export default function ProgressBar({ items, scrollerRef, inGallery }: Props) {
         <span className="pb-chevron" aria-hidden="true">{open ? '‹' : '›'}</span>
       </div>
 
-      {/* Nav items, evenly spaced — hidden when collapsed */}
+      {/* Nav items — section headers always, subsections only for active section */}
       <div className="pb-items">
         <div className="pb-track" aria-hidden="true" />
-        {items.map((item, idx) => {
+        {visibleItems.map((item, idx) => {
           const isActive = idx === activeIndex
-          const isPassed = !isActive && scrollTop >= effectivePx(item)
+          const isPassed = !isActive && ST >= effectivePx(item)
           return (
             <div
               key={item.id}
               className={[
                 'pb-item',
+                item.parentId ? 'pb-item--sub' : '',
                 isActive ? 'pb-item--active' : '',
-                isPassed ? 'pb-item--passed' : '',
+                isPassed  ? 'pb-item--passed' : '',
               ].filter(Boolean).join(' ')}
-              onClick={() => handleClick(item, idx)}
+              onClick={() => handleClick(item)}
               title={item.label}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && handleClick(item, idx)}
+              onKeyDown={(e) => e.key === 'Enter' && handleClick(item)}
             >
               <div className="pb-dot" />
               <span className="pb-label">{item.label}</span>
