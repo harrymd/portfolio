@@ -8,24 +8,28 @@
         {
           "number": 1,
           "name": "Interactive maps?",
+      	  "contents-name": "Interactive maps",
           "text": "Make your project browsable, navigable, and exciting! Visualise relationships, notice patterns, or share information. Make use of the wealth of public information on OpenStreetMap and other sources.",
           "image": null
         },
         {
           "number": 2,
           "name": "Data science and visualisation?",
+      	  "contents-name": "Data science and viz",
           "text": "Explore your datasets, fit models, and extract meaning from complexity. Display your information so it's clear and attention-grabbing. Use modern machine learning where appropriate, or classical statistical methods.",
           "image": null
         },
         {
           "number": 3,
           "name": "Cartography?",
+      	  "contents-name": "Cartography",
           "text": "Capture the spatial aspect of your project in beautiful, clear, information-rich maps. Include the latest remote-sensing datasets including satellite imagery and digital elevation models.. Inform your strategy.",
           "image": null
         },
         {
           "number": 4,
           "name": "Custom pipelines?",
+      	  "contents-name": "Custom pipelines",
           "text": "Add to your existing data architecture, create a new workflow, or build a tool that your team can use, or which your customers can interact with.",
           "image": null
         }
@@ -39,24 +43,28 @@
         {
           "number": 5,
           "name": "Oxford University WildCRU",
+      	  "contents-name": "WildCRU",
           "text": "I built the <a href = 'https://www.wildcru.org/projects/wildmaps-species-distribution-model-dashboard/' target='_blank'>WildMAPS Species Distribution Model dashboard</a>. This owner-updatable catalog of raster data is a research tool for ecologists worldwide. It’s built to display big files (100s of gigabytes) smoothly, with a low hosting cost (pennies per week).",
           "image": "wildcru.png" 
         },
         {
           "number": 6,
           "name": "NHS psychiatrists",
+      	  "contents-name": "NHS",
           "text": "I processed more than five million rows of mental-health reporting, for a group of NHS (UK National Health Service) psychiatrists trying to understand how different restraint methods are used. The results and visualisations revealed severe gaps in reporting, and were <a href = 'https://www.cambridge.org/core/journals/bjpsych-bulletin/article/reporting-of-oral-chemical-restraint-in-the-mental-health-services-monthly-statistics-for-england/CF731E113F65A4921ED00BDC76D3F852' target='_blank'>published in BJPsych Bulletin</a>.",
           "image": "nhs.png"
         },
         {
           "number": 7,
           "name": "Hydrogen explorers",
+      	  "contents-name": "H2 explorers",
           "text": "(For confidentiality reasons, no specific details are given.) In a soil-gas survey, I planned survey locations, collected field data, coordinated teams, and plotted results, to determine the prospectivity of a target region.",
           "image": "hydrogen.png"
         },
         {
           "number": 8,
           "name": "Oxford University SalGo Team",
+      	  "contents-name": "SalGo Team",
           "text": "The SalGo Team were locked in to an expensive subscription for the map on the <a href = 'https://compadre-db.org/' target='_blank'>homepage</a> of their plant and animal database (COMPADRE/COMADRE). In a day's work, I swapped it out for a permanent, free, improved solution, integrating with their existing PHP backend.",
           "image": "salgo.png"
         }
@@ -70,25 +78,29 @@
         {
           "number": 9,
           "name": "Education",
-          "text": "BA, MSci (physics, minor geology) University of Cambridge.<br>PhD (seismology) Massachusetts Institute of Technology.<br>I’m trained as a scientist, with subject knowledge in physics, mathematics, statitistics, geology, and scientific computing.",
+      	  "contents-name": "Education",
+          "text": "<ul><li>BA, MSci (physics, minor geology)<br><em>University of Cambridge</em></li><li>PhD (seismology)<br><em>Massachusetts Institute of Technology</em></li></ul>I’m trained as a scientist, with subject knowledge in physics, mathematics, statistics, geology, and scientific computing.",
           "image": null
         },
         {
           "number": 10,
           "name": "Humanitarian disaster response",
+      	  "contents-name": "Humanitarian",
           "text": "I'm a deployable geospatial volunteer for <a href = 'https://mapaction.org/' target = '_blank'>MapAction</a>, with over seven weeks of emergency response experience, including field missions in Myanmar and Mozambique.",
           "image": null
         },
         {
           "number": 11,
           "name": "Scientific fieldwork",
+      	  "contents-name": "Science fieldwork",
           "text": "I've done than 21 weeks of geological and geophysical fieldwork in Europe, the Americas, and India, including: six weeks of solo mapping in Jamaica, and leading a gravity survey in Saint Lucia.",
           "image": null
         },
         {
           "number": 12,
           "name": "More skills",
-          "text": "See my <a href = '/public/cv_hrmd.pdf' target='_blank'>full CV</a> for other skills: programming and GIS tools, spoken languages, teaching, writing, and even long-distance hiking, if you need trail maps...",
+      	  "contents-name": "Full CV",
+          "text": "See my <a href = 'cv_hrmd.pdf' target='_blank'>full CV</a> for other skills: programming and GIS tools, spoken languages, teaching, writing, and even long-distance hiking, if you need trail maps...",
           "image": null
         }
       ]
@@ -101,24 +113,28 @@
         {
           "number": 13,
           "name": "Top quality",
+      	  "contents-name": "Quality",
           "text": "I take pride in my products, and I'm just as invested as you in the quality of the result.",
           "image": null
         },
         {
           "number": 14,
           "name": "Free, open tools that save you money",
+      	  "contents-name": "FOSS",
           "text": "Don't get locked in to expensive contracts! Free software is now powerful enough for any geospatial task. No recurring bills, and no software overheads from me.",
           "image": null
         },
         {
           "number": 15,
           "name": "Efficiency",
+      	  "contents-name": "Efficiency",
           "text": "We'll agree a timeframe, and I can get things done fast!",
           "image": null
         },
         {
           "number": 16,
           "name": "Communication and iteration",
+      	  "contents-name": "Communication",
           "text": "I'm a good communicator and I'll iterate the product with you to make sure you get what you want. So... get in touch! Email me, Harry, at: <a href='mailto:projects@HKuril.com'>projects@HKuril.com</a>",
           "image": null
         }
