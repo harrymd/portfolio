@@ -30,8 +30,8 @@ npm run deploy    # build + push dist/ to gh-pages branch
 | `public/narrative.json` | Text/images for each POI, keyed by `id` |
 | `public/gallery_content.json` | Gallery cards (title, description, tools, image) |
 | `scripts/preprocess.py` | Generates `public/static_content.html` for SEO crawlers |
-| `scripts/generate_tile_manifest.py` | Generates `public/tile_manifest.json` — z10 tile XYZ list for prefetcher |
-| `public/tile_manifest.json` | Pre-computed tile list (376 tiles, z10, ±1 buffer) — generated at build time |
+| `scripts/generate_tile_manifest.py` | Generates `public/tile_manifest.json` — z10 (desktop) and z9 (mobile) tile XYZ lists |
+| `public/tile_manifest.json` | Pre-computed tile lists (376 z10, 188 z9, ±1 buffer) — run script manually when route changes |
 | `src/utils/prefetchTiles.ts` | Idle-time tile prefetcher; triggered after map ready |
 
 `narrative.json` and `gallery_content.json` are fetched at runtime (not static imports) because they're loaded alongside the geospatial files in `LoadingScreen.tsx`. They must stay in `public/`.

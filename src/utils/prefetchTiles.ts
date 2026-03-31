@@ -8,9 +8,12 @@ const PMTILES_HTTP_URL     = 'https://hrmd-portfolio.s3.eu-west-2.amazonaws.com/
 const TAG = '[tile-prefetch]'
 
 interface TileManifest {
-  zoom: number
-  tiles: [number, number][]
-  count: number
+  zoom:      number
+  tiles:     [number, number][]
+  count:     number
+  zoom_mob:  number
+  tiles_mob: [number, number][]
+  count_mob: number
 }
 
 // requestIdleCallback with 50ms setTimeout fallback (old Safari)
@@ -93,7 +96,6 @@ export async function prefetchTiles(cancelled: () => boolean): Promise<void> {
     const tileJson = await tileJsonRes.json() as { tiles: string[] }
     vectorTemplate = tileJson.tiles[0]
 
-    console.log(`${TAG} manifest: ${manifest.count} tiles at z${manifest.zoom}`)
     console.log(`${TAG} vector source: ${vectorTemplate}`)
   } catch (err) {
     console.warn(`${TAG} setup failed, aborting:`, err)
@@ -102,7 +104,11 @@ export async function prefetchTiles(cancelled: () => boolean): Promise<void> {
 
   if (cancelled()) return
 
-  const { zoom, tiles } = manifest
+  const isMobile = window.innerWidth < 768
+  const zoom  = isMobile ? manifest.zoom_mob  : manifest.zoom
+  const tiles = isMobile ? manifest.tiles_mob : manifest.tiles
+
+  console.log(`${TAG} manifest: ${tiles.length} tiles at z${zoom} (${isMobile ? 'mobile' : 'desktop'})`)
 
   // ── 2. Build task lists ───────────────────────────────────────────────────
 
