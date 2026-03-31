@@ -19,15 +19,17 @@ interface Props {
   data: LoadedData
 }
 
-const FIXED_ZOOM        = 10   // ocean_buffers PMTiles only available at zoom ≥ 10
+const FIXED_ZOOM     = 10   // desktop zoom — ocean_buffers PMTiles available at zoom ≥ 9
+const FIXED_ZOOM_MOB = 9    // mobile zoom — fewer tiles per viewport, smoother navigation
 const FIXED_BEARING     = 220
 const POI_WINDOW_KM     = 10
 const BASE_PX_PER_KM    = 100
 const SLOW_FACTOR       = 2
 const MOBILE_BREAKPOINT = 768
 const GALLERY_FADE_PX   = 2000
-const NAV_ANIM_DURATION  = 3600  // minimum ms for next/prev port animated scroll
-const MAX_SPEED_PX_PER_MS = 1.5    // cap: px per ms (extends duration for long hops)
+const NAV_ANIM_DURATION       = 3600  // minimum ms for next/prev port animated scroll
+const MAX_SPEED_PX_PER_MS     = 1.5   // cap: px per ms (extends duration for long hops)
+const MAX_SPEED_PX_PER_MS_MOB = 0.75  // slower cap on mobile to allow tiles to load
 const MIN_OVERLAY_MS     = 1500  // minimum ms the loading overlay stays visible
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -326,7 +328,7 @@ export default function MapJourney({ data }: Props) {
     const startPx  = scroller.scrollTop
     const delta    = targetPx - startPx
     navDirectionRef.current = delta >= 0 ? 1 : -1
-    const duration  = Math.max(NAV_ANIM_DURATION, Math.abs(delta) / MAX_SPEED_PX_PER_MS)
+    const duration  = Math.max(NAV_ANIM_DURATION, Math.abs(delta) / (window.innerWidth < 768 ? MAX_SPEED_PX_PER_MS_MOB : MAX_SPEED_PX_PER_MS))
     const startTime = performance.now()
     const ease = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
 
@@ -365,7 +367,7 @@ export default function MapJourney({ data }: Props) {
     const targetPx = scrollMapping.totalPx
     const delta    = targetPx - startPx
     navDirectionRef.current = 1  // always forward into gallery
-    const duration  = Math.max(NAV_ANIM_DURATION, Math.abs(delta) / MAX_SPEED_PX_PER_MS)
+    const duration  = Math.max(NAV_ANIM_DURATION, Math.abs(delta) / (window.innerWidth < 768 ? MAX_SPEED_PX_PER_MS_MOB : MAX_SPEED_PX_PER_MS))
     const startTime = performance.now()
     const ease = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
 
@@ -409,7 +411,7 @@ export default function MapJourney({ data }: Props) {
     const km        = scrollPxToKm(clampedPx, scrollMapping)
     const center    = kmToLngLat(km)
 
-    map.easeTo({ center, zoom: FIXED_ZOOM, bearing: FIXED_BEARING, duration: 100, easing: (t) => t })
+    map.easeTo({ center, zoom: (window.innerWidth < 768 ? FIXED_ZOOM_MOB : FIXED_ZOOM), bearing: FIXED_BEARING, duration: 100, easing: (t) => t })
 
     const rawBearing = getBearingAtKm(km)
     const bearing = navDirectionRef.current === -1 ? (rawBearing + 180) % 360 : rawBearing
@@ -520,7 +522,7 @@ export default function MapJourney({ data }: Props) {
       container: mapContainerRef.current,
       style: style as maplibregl.StyleSpecification,
       center: initialCenter,
-      zoom: FIXED_ZOOM,
+      zoom: (window.innerWidth < 768 ? FIXED_ZOOM_MOB : FIXED_ZOOM),
       bearing: FIXED_BEARING,
       interactive: false,
       attributionControl: false,

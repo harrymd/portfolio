@@ -53,11 +53,13 @@ npm run deploy    # build + push dist/ to gh-pages branch
 ## Key constants (MapJourney.tsx)
 
 ```ts
-FIXED_ZOOM          = 10    // PMTiles only has tiles at zoom ≥ 10
-NAV_ANIM_DURATION   = 3600  // ms minimum for port-to-port animation
-MAX_SPEED_PX_PER_MS = 5     // caps animation speed for long hops
-GALLERY_FADE_PX     = 2000  // scroll px of fade-in zone before gallery
-MIN_OVERLAY_MS      = 1500  // minimum loading screen display time
+FIXED_ZOOM              = 10    // desktop zoom — PMTiles available at zoom ≥ 9
+FIXED_ZOOM_MOB          = 9     // mobile zoom — fewer tiles, smoother navigation
+NAV_ANIM_DURATION       = 3600  // ms minimum for port-to-port animation
+MAX_SPEED_PX_PER_MS     = 1.5   // caps animation speed for long hops (desktop)
+MAX_SPEED_PX_PER_MS_MOB = 0.75  // slower cap on mobile to allow tiles to load
+GALLERY_FADE_PX         = 2000  // scroll px of fade-in zone before gallery
+MIN_OVERLAY_MS          = 1500  // minimum loading screen display time
 ```
 
 ## Mobile layout constants (CSS)
