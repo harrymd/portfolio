@@ -72,6 +72,7 @@
   /* left-side gap before dots; right-side gap after labels */
   padding: 1.25rem 1.5rem 1.25rem 0;
   min-height: 230px;
+  row-gap: 0.5rem;
 }
 
 /* Static vertical track line (manually centred behind dots) */
@@ -135,7 +136,7 @@
 /* ── Labels ───────────────────────────────────────────────────────────────── */
 .pb-label {
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   font-weight: 400;
   letter-spacing: 0.02em;
   color: var(--color-text-muted);
@@ -154,6 +155,25 @@
   color: #ffffff;
 }
 
+/* ── Expand/collapse arrow ────────────────────────────────────────────────── */
+.pb-arrow {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1;
+  flex-shrink: 0;
+  display: inline-block;
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.pb-arrow--open {
+  transform: rotate(0deg);
+}
+
+.pb-item:hover .pb-arrow {
+  color: var(--color-text);
+}
+
 /* ── Subsection items (indented, smaller) ─────────────────────────────────── */
 .pb-item--sub {
   padding-left: 1.5rem;
@@ -165,7 +185,7 @@
 }
 
 .pb-item--sub .pb-label {
-  font-size: 0.68rem;
+  font-size: 0.86rem;
   color: rgba(255, 255, 255, 0.5);
 }
 
@@ -173,23 +193,64 @@
   color: var(--color-text);
 }
 
-/* ── Mobile: reposition to top-quarter, show labels at slightly larger size ── */
+/* ── Mobile: horizontal bar at top, fills map area when open ─────── */
+/* Layout constants (must match MapJourney.css mobile panel CSS):
+   header: 3.75rem | strip height: 2.5rem (explicit)               */
 @media (max-width: 767px) {
   .progress-bar {
-    top: 25%;
-    transform: translateY(-25%);
+    top: 4.5rem;  /* header (3.75rem) + gap */
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    flex-direction: column;  /* strip on top, items stacked below */
+    border-left: 1px solid var(--color-border);
+    border-radius: 4px;
+    z-index: 11;   /* above poi-panel (z-index 10) */
+    width: fit-content;
+    min-width: 0;
   }
 
-  .pb-items {
-    padding: 1rem 1rem 1rem 0;
-    min-height: 180px;
+  /* Horizontal title strip */
+  .pb-title-strip {
+    flex-direction: row;
+    justify-content: center;
+    height: 1.9rem;          /* explicit — matched in MapJourney.css */
+    padding: 0 0.6rem;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    gap: 0.4rem;
+    white-space: nowrap;
   }
+
+  /* Horizontal text (was vertical on desktop) */
+  .pb-title {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+
+  /* Chevron rotated: › → ∨ (closed), ‹ → ∧ (open) */
+  .pb-chevron {
+    display: inline-block;
+    transform: rotate(90deg);
+  }
+
+  /* Items fill available screen when open */
+  .pb-items {
+    padding: 1rem 1.5rem 1rem 0.5rem;
+    min-height: 0;
+    max-height: calc(100vh - 7.15rem);  /* total minus header + gap + strip + gap */
+    overflow-y: auto;
+    scrollbar-width: none;
+    row-gap: 0.75rem;
+  }
+
+  .pb-items::-webkit-scrollbar { display: none; }
 
   .pb-label {
-    font-size: 0.82rem;
+    font-size: 1.2rem;
   }
 
   .pb-item--sub .pb-label {
-    font-size: 0.74rem;
+    font-size: 1.05rem;
   }
 }

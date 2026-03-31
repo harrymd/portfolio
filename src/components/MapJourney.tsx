@@ -18,14 +18,16 @@ interface Props {
   data: LoadedData
 }
 
-const FIXED_ZOOM        = 10
+const FIXED_ZOOM        = 10   // ocean_buffers PMTiles only available at zoom ≥ 10
 const FIXED_BEARING     = 220
 const POI_WINDOW_KM     = 10
-const BASE_PX_PER_KM    = 100   // halved → 2× faster scroll
-const SLOW_FACTOR       = 2     // 2× px/km near POIs
+const BASE_PX_PER_KM    = 100
+const SLOW_FACTOR       = 2
 const MOBILE_BREAKPOINT = 768
-const ARROW_SCROLL_PX   = 750
-const GALLERY_FADE_PX   = 2000 
+const GALLERY_FADE_PX   = 2000
+const NAV_ANIM_DURATION  = 3600  // minimum ms for next/prev port animated scroll
+const MAX_SPEED_PX_PER_MS = 1.5    // cap: px per ms (extends duration for long hops)
+const MIN_OVERLAY_MS     = 1500  // minimum ms the loading overlay stays visible
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Scroll mapping: piecewise linear with SLOW_FACTOR dwell near each POI
@@ -36,8 +38,6 @@ interface ScrollMapping {
   totalPx: number
 }
 
-// dwellPoints: the subset of points that trigger the slow-scroll zone.
-// Pass innerPoints so the start and end markers are excluded.
 function buildScrollMapping(snappedPoints: SnappedPoint[], dwellPoints: SnappedPoint[], pxPerKm = BASE_PX_PER_KM): ScrollMapping {
   if (snappedPoints.length === 0) return { kmSamples: [], pxCumulative: [], totalPx: 0 }
 
@@ -113,7 +113,6 @@ function kmToPx(targetKm: number, mapping: ScrollMapping): number {
 // Canvas icon builders
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Small rightward-pointing arrow placed along the path line. */
 function makePathArrow(): { width: number; height: number; data: Uint8Array } {
   const size = 16
   const canvas = document.createElement('canvas')
@@ -133,10 +132,6 @@ function makePathArrow(): { width: number; height: number; data: Uint8Array } {
   return { width: size, height: size, data: new Uint8Array(ctx.getImageData(0, 0, size, size).data.buffer) }
 }
 
-/**
- * Upward-pointing (north = 0°) arrow for the live position cursor.
- * MapLibre rotates it via icon-rotate: ['get', 'bearing'].
- */
 function makeCursorArrow(): { width: number; height: number; data: Uint8Array } {
   const size = 32
   const canvas = document.createElement('canvas')
@@ -168,24 +163,32 @@ function makeCursorArrow(): { width: number; height: number; data: Uint8Array } 
 // Component
 // ─────────────────────────────────────────────────────────────────────────────
 export default function MapJourney({ data }: Props) {
-  const mapContainerRef      = useRef<HTMLDivElement>(null)
-  const mapRef               = useRef<maplibregl.Map | null>(null)
-  const scrollerRef          = useRef<HTMLDivElement>(null)
-  const rafRef               = useRef<number | null>(null)
-  const detailTimerRef       = useRef<number | null>(null)
-  const idleTimerRef         = useRef<number | null>(null)
-  const navTimerRef          = useRef<number | null>(null)
-  const progressBarOpenRef   = useRef(false)
+  const mapContainerRef    = useRef<HTMLDivElement>(null)
+  const mapRef             = useRef<maplibregl.Map | null>(null)
+  const scrollerRef        = useRef<HTMLDivElement>(null)
+  const panelRef           = useRef<HTMLElement>(null)
+  const rafRef             = useRef<number | null>(null)
+  const navAnimRef         = useRef<number | null>(null)
+  const navAnimatingRef    = useRef(false)   // true while next/prev animation is running
+  const navDirectionRef    = useRef<1|-1>(1) // +1 forward, -1 backward (for cursor bearing)
+  const handleScrollRef    = useRef<(() => void) | null>(null) // latest handleScroll for animation end
+  const inGalleryRef       = useRef(false)   // mirror of inGallery state for event handlers
+  const galleryThresholdRef = useRef(0)      // px where journey ends and gallery begins
+  const touchStartYRef      = useRef(0)      // last touchstart clientY for direction detection
+  const [progressBarOpen, setProgressBarOpen] = useState(false)
+  const detailTimerRef     = useRef<number | null>(null)
+  const idleTimerRef       = useRef<number | null>(null)
+  const navTimerRef        = useRef<number | null>(null)
 
   const [mapReady, setMapReady]             = useState(false)
   const [activePoiIndex, setActivePoiIndex] = useState<number | null>(null)
   const [currentSectionName, setCurrentSectionName] = useState<string>('')
   const [sectionVisible, setSectionVisible] = useState(false)
-  const [scrollHintVisible, setScrollHintVisible] = useState(true)
-  const [inGallery, setInGallery]           = useState(false)
+  const [inGallery,        setInGallery]        = useState(false)
+  const [pastSelectedWork, setPastSelectedWork] = useState(false)
   const [navFading, setNavFading]           = useState(false)
-  const [scrollTopState, setScrollTopState] = useState(0)
   const [contentsHintDismissed, setContentsHintDismissed] = useState(false)
+  const [welcomeMode, setWelcomeMode]       = useState(true)
 
   // Cross-fade states
   const [displayedPoi, setDisplayedPoi]   = useState<SnappedPoint | null>(null)
@@ -204,8 +207,10 @@ export default function MapJourney({ data }: Props) {
     [snappedPoints],
   )
 
-  // Per-section km ranges: [firstPoi.dist − POI_WINDOW_KM … lastPoi.dist + POI_WINDOW_KM]
-  // The section header is visible anywhere inside this range.
+  const firstInnerIdx = snappedPoints.length > 2 ? 1 : 0
+  const lastInnerIdx  = snappedPoints.length > 2 ? snappedPoints.length - 2 : snappedPoints.length - 1
+
+  // Per-section km ranges for section header visibility
   const sectionRanges = useMemo(() => {
     const ranges: { sectionName: string; minKm: number; maxKm: number }[] = []
     for (const sp of innerPoints) {
@@ -236,7 +241,6 @@ export default function MapJourney({ data }: Props) {
     let lastSectionName  = ''
     for (const sp of innerPoints) {
       if (!sp.sectionName) continue
-      // New section: emit section header
       if (sp.sectionName !== lastSectionName) {
         lastSectionName  = sp.sectionName
         currentSectionId = `section-${sp.narrativeId}`
@@ -246,7 +250,6 @@ export default function MapJourney({ data }: Props) {
           scrollPx: kmToPx(sp.distanceAlongPath, scrollMapping),
         })
       }
-      // Always emit subsection (indented under parent section)
       if (sp.subsectionName) {
         items.push({
           id: `sub-${sp.narrativeId}`,
@@ -285,10 +288,11 @@ export default function MapJourney({ data }: Props) {
     [pathLine, data.totalDistance],
   )
 
-  // Fade-transition navigation: overlay fades in → instant scroll jump → overlay fades out
+  // Fade-transition navigation used by ProgressBar and "More info" / gallery buttons
   const handleNavigate = useCallback((targetPx: number) => {
     const el = scrollerRef.current
     if (!el) return
+    setWelcomeMode(false)
     if (navTimerRef.current !== null) clearTimeout(navTimerRef.current)
     setNavFading(true)
     navTimerRef.current = window.setTimeout(() => {
@@ -298,28 +302,116 @@ export default function MapJourney({ data }: Props) {
     }, 300)
   }, [])
 
+  // Smooth animated scroll to a specific POI — map pans visibly during travel
+  const navigateToPoi = useCallback((targetSnappedIndex: number) => {
+    const target = snappedPoints[targetSnappedIndex]
+    const scroller = scrollerRef.current
+    if (!target || !scroller) return
+
+    const targetPx = kmToPx(target.distanceAlongPath, scrollMapping)
+
+    // Suppress scroll-driven POI activation while animating
+    navAnimatingRef.current = true
+    setActivePoiIndex(null)
+    setSectionVisible(false)
+    setCurrentSectionName('')
+    setDetailVisible(false)
+
+    if (navAnimRef.current !== null) {
+      cancelAnimationFrame(navAnimRef.current)
+      navAnimRef.current = null
+    }
+
+    const startPx  = scroller.scrollTop
+    const delta    = targetPx - startPx
+    navDirectionRef.current = delta >= 0 ? 1 : -1
+    const duration  = Math.max(NAV_ANIM_DURATION, Math.abs(delta) / MAX_SPEED_PX_PER_MS)
+    const startTime = performance.now()
+    const ease = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+
+    const step = (now: number) => {
+      const t = Math.min((now - startTime) / duration, 1)
+      scroller.scrollTop = startPx + delta * ease(t)
+      if (t < 1) {
+        navAnimRef.current = requestAnimationFrame(step)
+      } else {
+        navAnimRef.current = null
+        navAnimatingRef.current = false   // allow POI activation again
+        navDirectionRef.current = 1       // reset to forward once stopped
+        handleScrollRef.current?.()       // guarantee POI activation fires
+      }
+    }
+    navAnimRef.current = requestAnimationFrame(step)
+  }, [snappedPoints, scrollMapping])
+
+  // Animate scroll to gallery (used by "Next port" at the last POI — no fade, cursor travels the track)
+  const navigateToGallery = useCallback(() => {
+    const scroller = scrollerRef.current
+    if (!scroller) return
+
+    navAnimatingRef.current = true
+    setActivePoiIndex(null)
+    setSectionVisible(false)
+    setCurrentSectionName('')
+    setDetailVisible(false)
+
+    if (navAnimRef.current !== null) {
+      cancelAnimationFrame(navAnimRef.current)
+      navAnimRef.current = null
+    }
+
+    const startPx  = scroller.scrollTop
+    const targetPx = scrollMapping.totalPx
+    const delta    = targetPx - startPx
+    navDirectionRef.current = 1  // always forward into gallery
+    const duration  = Math.max(NAV_ANIM_DURATION, Math.abs(delta) / MAX_SPEED_PX_PER_MS)
+    const startTime = performance.now()
+    const ease = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+
+    const step = (now: number) => {
+      const t = Math.min((now - startTime) / duration, 1)
+      scroller.scrollTop = startPx + delta * ease(t)
+      if (t < 1) {
+        navAnimRef.current = requestAnimationFrame(step)
+      } else {
+        navAnimRef.current = null
+        navAnimatingRef.current = false
+        handleScrollRef.current?.()  // guarantee gallery transition fires
+      }
+    }
+    navAnimRef.current = requestAnimationFrame(step)
+  }, [scrollMapping.totalPx])
+
   const handleScroll = useCallback(() => {
     const scroller = scrollerRef.current
     const map      = mapRef.current
     if (!scroller || !map) return
 
-    const scrollTop     = scroller.scrollTop
-    const scrollRangePx = scrollMapping.totalPx
+    const scrollTop        = scroller.scrollTop
+    const scrollRangePx    = scrollMapping.totalPx
     const galleryThreshold = Math.max(0, scrollRangePx - GALLERY_FADE_PX)
-    setInGallery(scrollTop >= galleryThreshold)
-    setScrollTopState(scrollTop)
+    galleryThresholdRef.current = galleryThreshold
+    const newInGallery     = scrollTop >= galleryThreshold
+    inGalleryRef.current   = newInGallery
+    setInGallery(newInGallery)
+
+    // Track whether user has scrolled past the 'Selected work' heading
+    if (newInGallery) {
+      const gwEl = document.getElementById('gallery-selected-work')
+      const scrollerRect = scroller.getBoundingClientRect()
+      setPastSelectedWork(gwEl ? gwEl.getBoundingClientRect().top < scrollerRect.top : false)
+    } else {
+      setPastSelectedWork(false)
+    }
 
     const clampedPx = Math.min(scrollTop, scrollRangePx)
     const km        = scrollPxToKm(clampedPx, scrollMapping)
     const center    = kmToLngLat(km)
 
-    const isMobile = window.innerWidth < MOBILE_BREAKPOINT
-    const xOffset  = isMobile && progressBarOpenRef.current ? window.innerWidth * 0.2 : 0
-    const offset: [number, number] = isMobile ? [xOffset, -window.innerHeight / 4] : [0, 0]
+    map.easeTo({ center, zoom: FIXED_ZOOM, bearing: FIXED_BEARING, duration: 100, easing: (t) => t })
 
-    map.easeTo({ center, zoom: FIXED_ZOOM, bearing: FIXED_BEARING, duration: 100, easing: (t) => t, offset })
-
-    const bearing = getBearingAtKm(km)
+    const rawBearing = getBearingAtKm(km)
+    const bearing = navDirectionRef.current === -1 ? (rawBearing + 180) % 360 : rawBearing
     const cursorSource = map.getSource('journey-cursor') as maplibregl.GeoJSONSource | undefined
     if (cursorSource) {
       cursorSource.setData({
@@ -329,11 +421,11 @@ export default function MapJourney({ data }: Props) {
       })
     }
 
-    if (scrollTop > 10) setScrollHintVisible(false)
+    // POI and section activation — skipped during programmatic nav animation
+    if (navAnimatingRef.current) return
 
-    // Active POI: first innerPoint within ±POI_WINDOW_KM
-    const firstIdx = snappedPoints.length > 2 ? 1 : 0
-    const lastIdx  = snappedPoints.length > 2 ? snappedPoints.length - 2 : snappedPoints.length - 1
+    const firstIdx = firstInnerIdx
+    const lastIdx  = lastInnerIdx
     let newActive: number | null = null
     for (let i = firstIdx; i <= lastIdx; i++) {
       if (Math.abs(km - snappedPoints[i].distanceAlongPath) <= POI_WINDOW_KM) {
@@ -342,7 +434,6 @@ export default function MapJourney({ data }: Props) {
       }
     }
 
-    // Section header visibility: true while km is inside any section's full range
     let newSectionVisible = false
     let newSectionName    = ''
     for (const range of sectionRanges) {
@@ -356,7 +447,7 @@ export default function MapJourney({ data }: Props) {
     setActivePoiIndex(newActive)
     setSectionVisible(newSectionVisible)
     setCurrentSectionName(newSectionName)
-  }, [snappedPoints, sectionRanges, scrollMapping, kmToLngLat, getBearingAtKm])
+  }, [snappedPoints, sectionRanges, scrollMapping, kmToLngLat, getBearingAtKm, firstInnerIdx, lastInnerIdx])
 
   // Cross-fade subsection detail when active POI changes
   const activePoi: SnappedPoint | null =
@@ -364,6 +455,9 @@ export default function MapJourney({ data }: Props) {
 
   useEffect(() => {
     if (detailTimerRef.current !== null) clearTimeout(detailTimerRef.current)
+
+    // Don't update panel content while nav animation is running
+    if (navAnimatingRef.current) return
 
     if (!activePoi) {
       setDetailVisible(false)
@@ -380,6 +474,30 @@ export default function MapJourney({ data }: Props) {
       setDetailVisible(true)
     }
   }, [activePoi]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep inGalleryRef in sync (used inside passive event handlers)
+  useEffect(() => { inGalleryRef.current = inGallery }, [inGallery])
+
+  // Keep handleScrollRef current so animation-end callbacks can call it
+  useEffect(() => { handleScrollRef.current = handleScroll }, [handleScroll])
+
+  // Hash deep-link: when opened as a new tab via "More info", jump to the gallery card
+  useEffect(() => {
+    if (!mapReady) return
+    const hash = window.location.hash
+    if (!hash.startsWith('#gallery-card-')) return
+    const scroller = scrollerRef.current
+    if (!scroller) return
+    scroller.scrollTop = scrollMapping.totalPx
+    const t = window.setTimeout(() => {
+      const card = document.getElementById(hash.slice(1))
+      if (!card || !scrollerRef.current) return
+      const scr = scrollerRef.current
+      const offset = card.getBoundingClientRect().top + scr.scrollTop - scr.getBoundingClientRect().top
+      scr.scrollTop = offset - 80
+    }, 500)
+    return () => clearTimeout(t)
+  }, [mapReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialise map once
   useEffect(() => {
@@ -399,25 +517,20 @@ export default function MapJourney({ data }: Props) {
     })
 
     mapRef.current = map
-
-    // Fallback: show map after 8 s even if idle never fires (e.g. PMTiles 403)
+    const mapInitTime = Date.now()
     idleTimerRef.current = window.setTimeout(() => setMapReady(true), 8000)
 
     map.on('load', () => {
-      // Compute initial cursor bearing at the journey start
       const startKm  = snappedPoints[0]?.distanceAlongPath ?? 0
       const bKm2     = Math.min(data.totalDistance, startKm + 0.5)
       const bPt1     = turf.along(pathLine, startKm, { units: 'kilometers' })
       const bPt2     = turf.along(pathLine, bKm2,    { units: 'kilometers' })
       const initBearing = turf.bearing(bPt1, bPt2)
 
-      // Register custom icon sprites
       map.addImage('path-arrow',   makePathArrow())
       map.addImage('cursor-arrow', makeCursorArrow())
 
-      // ── Path ──────────────────────────────────────────────
       map.addSource('journey-path', { type: 'geojson', data: data.pathGeoJSON })
-
       map.addLayer({
         id: 'journey-path-bg',
         type: 'line',
@@ -446,7 +559,6 @@ export default function MapJourney({ data }: Props) {
         },
       })
 
-      // ── POI markers (inner points only) ───────────────────
       const poisGeoJSON: GeoJSON.FeatureCollection = {
         type: 'FeatureCollection',
         features: innerPoints.map((sp) => ({
@@ -475,7 +587,6 @@ export default function MapJourney({ data }: Props) {
         },
       })
 
-      // ── Cursor ────────────────────────────────────────────
       map.addSource('journey-cursor', {
         type: 'geojson',
         data: {
@@ -510,10 +621,14 @@ export default function MapJourney({ data }: Props) {
         },
       })
 
-      // Reveal the map once all tiles (including PMTiles) are rendered
       map.once('idle', () => {
         if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
-        setMapReady(true)
+        const elapsed   = Date.now() - mapInitTime
+        const remaining = Math.max(0, MIN_OVERLAY_MS - elapsed)
+        idleTimerRef.current = window.setTimeout(() => {
+          setMapReady(true)
+          idleTimerRef.current = null
+        }, remaining)
       })
     })
 
@@ -524,53 +639,85 @@ export default function MapJourney({ data }: Props) {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Wire scroll listener
+  // Wire scroll listener and block user-initiated scrolling during journey
   useEffect(() => {
     const scroller = scrollerRef.current
     if (!scroller) return
+
     const onScroll = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
       rafRef.current = requestAnimationFrame(handleScroll)
     }
-    scroller.addEventListener('scroll', onScroll, { passive: true })
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartYRef.current = e.touches[0].clientY
+    }
+
+    // Block wheel/touch scroll in journey mode; also block upward scroll at gallery entry
+    const blockScroll = (e: Event) => {
+      if (!inGalleryRef.current) {
+        e.preventDefault()
+        return
+      }
+      // Prevent scrolling back up into the journey section
+      const scr = scrollerRef.current
+      if (scr && scr.scrollTop <= galleryThresholdRef.current + 5) {
+        if (e.type === 'wheel' && (e as WheelEvent).deltaY < 0) {
+          e.preventDefault()
+        } else if (e.type === 'touchmove' &&
+                   (e as TouchEvent).touches[0].clientY > touchStartYRef.current) {
+          e.preventDefault()
+        }
+      }
+    }
+
+    scroller.addEventListener('scroll',     onScroll,     { passive: true })
+    scroller.addEventListener('touchstart', onTouchStart, { passive: true })
+    scroller.addEventListener('wheel',      blockScroll,  { passive: false })
+    scroller.addEventListener('touchmove',  blockScroll,  { passive: false })
+
     return () => {
-      scroller.removeEventListener('scroll', onScroll)
+      scroller.removeEventListener('scroll',     onScroll)
+      scroller.removeEventListener('touchstart', onTouchStart)
+      scroller.removeEventListener('wheel',      blockScroll)
+      scroller.removeEventListener('touchmove',  blockScroll)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      if (navAnimRef.current !== null) cancelAnimationFrame(navAnimRef.current)
     }
   }, [handleScroll])
 
-  // Arrow-key scroll support
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
-      e.preventDefault()
-      const scroller = scrollerRef.current
-      if (!scroller) return
-      const delta = e.key === 'ArrowDown' ? ARROW_SCROLL_PX : -ARROW_SCROLL_PX
-      scroller.scrollBy({ top: delta, behavior: 'smooth' })
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  // ── Derived values ─────────────────────────────────────────────────────────
 
-  // Panel outer box: visible while km is inside a section's range, or during fade
   const panelVisible = sectionVisible || detailVisible
+  // Wide two-column layout whenever there is an image to show (desktop only via CSS)
+  const panelWide = !welcomeMode && !!displayedPoi?.image
 
-  // Contents hint: show after first POI, hide after second POI or when dismissed
-  const firstPoiPx  = innerPoints.length > 0 ? kmToPx(innerPoints[0].distanceAlongPath, scrollMapping) : 0
-  const secondPoiPx = innerPoints.length > 1 ? kmToPx(innerPoints[1].distanceAlongPath, scrollMapping) : Infinity
-  const contentsHintVisible = !contentsHintDismissed && scrollTopState > firstPoiPx && scrollTopState < secondPoiPx
+  const displayedPoiSnappedIdx = useMemo(() => {
+    if (!displayedPoi) return -1
+    return snappedPoints.findIndex((sp) => sp.narrativeId === displayedPoi.narrativeId)
+  }, [displayedPoi, snappedPoints])
 
+  const canGoPrev = displayedPoiSnappedIdx > firstInnerIdx
+  // canGoNext includes lastInnerIdx — at last POI, "Next port" goes to gallery
+  const canGoNext = displayedPoiSnappedIdx >= 0 && displayedPoiSnappedIdx <= lastInnerIdx
+
+  const panelCurrentlyVisible = (welcomeMode || panelVisible) && !inGallery
+
+  // Contents hint: show when user arrives at the second real POI (first gives time to read)
+  const contentsHintVisible = !contentsHintDismissed && !welcomeMode &&
+    displayedPoiSnappedIdx === firstInnerIdx + 1
+
+  // ── JSX ────────────────────────────────────────────────────────────────────
   return (
-    <div className="journey-root">
-      {/* Dark overlay that fades out once the map+PMTiles tiles have rendered */}
+    <div className={`journey-root${progressBarOpen ? ' journey-root--pb-open' : ''}`}>
+      {/* Dark overlay fades out once map+PMTiles are rendered */}
       <div
         className="map-loading-overlay"
         style={{ opacity: mapReady ? 0 : 1, pointerEvents: mapReady ? 'none' : 'auto' }}
         aria-hidden="true"
       />
 
-      {/* Full-screen overlay for contents-bar fade transition */}
+      {/* Full-screen overlay for ProgressBar fade-nav transition */}
       <div className={`nav-overlay${navFading ? ' nav-overlay--fading' : ''}`} aria-hidden="true" />
 
       <div className="map-container" ref={mapContainerRef} />
@@ -580,7 +727,7 @@ export default function MapJourney({ data }: Props) {
         scrollerRef={scrollerRef}
         inGallery={inGallery}
         onNavigate={handleNavigate}
-        onOpenChange={(open) => { progressBarOpenRef.current = open; handleScroll() }}
+        onOpenChange={setProgressBarOpen}
       />
 
       <header className={`journey-header${inGallery ? ' journey-header--hidden' : ''}`}>
@@ -601,44 +748,127 @@ export default function MapJourney({ data }: Props) {
         </div>
       </header>
 
-      {/* POI panel */}
-      <aside className={`poi-panel${panelVisible && !inGallery ? ' poi-panel--visible' : ''}`}>
-        <div className="poi-panel-section">{currentSectionName}</div>
-        <div className={`poi-panel-detail${detailVisible ? ' poi-panel-detail--visible' : ''}`}>
-          {displayedPoi && displayedPoi.subsectionName && (
-            <>
-              <div className="poi-panel-label">{displayedPoi.subsectionName}</div>
-              <p
-                className="poi-panel-description"
-                dangerouslySetInnerHTML={{ __html: displayedPoi.text }}
-              />
-              {displayedPoi.image && (
-                <img
-                  key={displayedPoi.image}
-                  className="poi-panel-image"
-                  src={`${import.meta.env.BASE_URL}gallery/${displayedPoi.image}`}
-                  alt={displayedPoi.subsectionName}
-                  onError={(e) => {
-                    ;(e.currentTarget as HTMLImageElement).style.display = 'none'
-                  }}
-                />
+      {/* POI panel — centred, with prev/next port navigation */}
+      <aside
+        ref={panelRef}
+        className={[
+          'poi-panel',
+          panelCurrentlyVisible ? 'poi-panel--visible' : '',
+          panelWide           ? 'poi-panel--wide'    : '',
+        ].filter(Boolean).join(' ')}
+      >
+        {welcomeMode ? (
+          /* Welcome screen shown before the first port */
+          <div className="poi-panel-welcome">
+            <div className="poi-panel-section">Does your project need&hellip;</div>
+            <div className="poi-panel-label">Kuril Geospatial?</div>
+            <p className="poi-panel-description">
+              Click &lsquo;Next port&rsquo; to see what Kuril Geospatial can do for you.
+            </p>
+            <button
+              className="poi-nav-btn poi-nav-btn--next"
+              onClick={() => { setWelcomeMode(false); navigateToPoi(firstInnerIdx) }}
+            >
+              Next port <span className="poi-nav-arrow">↓</span>
+            </button>
+          </div>
+        ) : (
+          <>
+            {canGoPrev && displayedPoi && (
+              <button
+                className="poi-nav-btn poi-nav-btn--prev"
+                onClick={() => navigateToPoi(displayedPoiSnappedIdx - 1)}
+                aria-label="Previous port"
+              >
+                <span className="poi-nav-arrow">↑</span>
+                Previous port
+              </button>
+            )}
+            <div className="poi-panel-section">{currentSectionName}</div>
+            <div className={`poi-panel-detail${detailVisible ? ' poi-panel-detail--visible' : ''}`}>
+              {displayedPoi && displayedPoi.subsectionName && (
+                displayedPoi.image ? (
+                  /* Two-column layout when an image is present */
+                  <div className="poi-panel-cols">
+                    <div className="poi-panel-col-text">
+                      <div className="poi-panel-label">{displayedPoi.subsectionName}</div>
+                      <p
+                        className="poi-panel-description"
+                        dangerouslySetInnerHTML={{ __html: displayedPoi.text }}
+                      />
+                      {displayedPoi.galleryId && (
+                        <p className="poi-more-info-text">
+                          <em>More info in 'Selected Work' section</em>
+                        </p>
+                      )}
+                    </div>
+                    <div className="poi-panel-col-image">
+                      <img
+                        key={displayedPoi.image}
+                        className="poi-panel-image"
+                        src={`${import.meta.env.BASE_URL}gallery/${displayedPoi.image}`}
+                        alt={displayedPoi.subsectionName}
+                        onError={(e) => {
+                          ;(e.currentTarget as HTMLImageElement).style.display = 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  /* Single-column layout when no image */
+                  <>
+                    <div className="poi-panel-label">{displayedPoi.subsectionName}</div>
+                    <p
+                      className="poi-panel-description"
+                      dangerouslySetInnerHTML={{ __html: displayedPoi.text }}
+                    />
+                    {displayedPoi.galleryId && (
+                      <p className="poi-more-info-text">
+                        <em>More info in 'Selected Work' section</em>
+                      </p>
+                    )}
+                  </>
+                )
               )}
-            </>
-          )}
-        </div>
+            </div>
+            {canGoNext && displayedPoi && (
+              <button
+                className="poi-nav-btn poi-nav-btn--next"
+                onClick={() => {
+                  if (displayedPoiSnappedIdx === lastInnerIdx) {
+                    navigateToGallery()
+                  } else {
+                    navigateToPoi(displayedPoiSnappedIdx + 1)
+                  }
+                }}
+                aria-label="Next port"
+              >
+                Next port <span className="poi-nav-arrow">↓</span>
+              </button>
+            )}
+          </>
+        )}
       </aside>
+
+      {/* "Previous port" button visible at the top of the gallery section, hides once past heading */}
+      {inGallery && !pastSelectedWork && (
+        <button
+          className="gallery-prev-port-btn"
+          onClick={() => navigateToPoi(lastInnerIdx)}
+        >
+          <span className="poi-nav-arrow">↑</span> Previous port
+        </button>
+      )}
 
       <AttributionWidget hidden={inGallery} />
 
-      {/* Scroll capture overlay: journey spacer + gallery */}
+      {/* Scroll capture overlay — spacer height drives programmatic navigation;
+          user scroll is blocked by the wheel/touchmove handlers above */}
       <div className="scroll-overlay" ref={scrollerRef}>
         <div style={{ height: `${scrollMapping.totalPx}px` }} />
         <GallerySection />
       </div>
 
-      {/* Fixed strip above scroll-overlay. Invisible during journey, visible in
-          gallery. Being fixed means rubber-band can't pull it away — it always
-          covers the bottom of the viewport, preventing dark-map bleedthrough. */}
       <div
         className={`gallery-bottom-buffer${inGallery ? ' gallery-bottom-buffer--visible' : ''}`}
         aria-hidden="true"
@@ -646,7 +876,7 @@ export default function MapJourney({ data }: Props) {
 
       {contentsHintVisible && (
         <div className="contents-hint" role="status">
-          <span>Tired of scrolling? Use the contents bar</span>
+          <span>&#8592; Skip to section</span>
           <button
             className="contents-hint-dismiss"
             onClick={() => setContentsHintDismissed(true)}
@@ -654,17 +884,6 @@ export default function MapJourney({ data }: Props) {
           >×</button>
         </div>
       )}
-
-      <div
-        className={`scroll-hint${scrollHintVisible ? '' : ' scroll-hint--hidden'}`}
-        aria-hidden="true"
-      >
-        <span>Scroll down to explore</span>
-        <span className="scroll-hint-sub">or use ↓ arrow key</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M12 5v14M5 12l7 7 7-7" />
-        </svg>
-      </div>
     </div>
   )
 }

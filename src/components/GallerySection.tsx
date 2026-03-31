@@ -11,7 +11,7 @@ interface GalleryEntry {
 
 function GalleryCard({ entry }: { entry: GalleryEntry }) {
   return (
-    <div className="gallery-card">
+    <div id={`gallery-card-${entry.id}`} className="gallery-card">
       <h3 className="gallery-card-title">{entry.title}</h3>
       <div
         className="gallery-card-desc"

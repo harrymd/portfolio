@@ -69,6 +69,7 @@ export default function LoadingScreen({ onLoaded }: Props) {
           subsectionContentsName: string
           text: string
           image: string | null
+          galleryId: string | null
         }
         const narrativeLookup = new Map<number, NarrativeLookup>()
         for (const section of narrativeRaw.sections) {
@@ -77,6 +78,7 @@ export default function LoadingScreen({ onLoaded }: Props) {
           for (const sub of section.subsections) {
             const subRaw = sub as unknown as Record<string, unknown>
             const subsectionContentsName = subRaw['contents-name'] as string ?? sub.name
+            const galleryId = (subRaw['gallery_id'] as string | undefined) ?? null
             narrativeLookup.set(sub.number, {
               sectionName: section.name,
               contentsName,
@@ -84,6 +86,7 @@ export default function LoadingScreen({ onLoaded }: Props) {
               subsectionContentsName,
               text: sub.text,
               image: sub.image,
+              galleryId,
             })
           }
         }
@@ -117,6 +120,7 @@ export default function LoadingScreen({ onLoaded }: Props) {
             subsectionContentsName: narrative?.subsectionContentsName ?? '',
             text: narrative?.text ?? '',
             image: narrative?.image ?? null,
+            galleryId: narrative?.galleryId ?? null,
             snappedCoord,
             distanceAlongPath,
           }

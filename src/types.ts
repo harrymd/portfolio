@@ -5,6 +5,7 @@ export interface NarrativeSubsection {
   name: string
   text: string
   image: string | null
+  gallery_id?: string
 }
 
 export interface NarrativeSection {
@@ -25,6 +26,7 @@ export interface SnappedPoint {
   subsectionContentsName: string // short label for contents pane ('contents-name' or subsectionName)
   text: string                  // subsection body text (may contain HTML)
   image: string | null          // filename in /gallery/, or null
+  galleryId: string | null      // matching card id in gallery_content.json, or null
   snappedCoord: [number, number]
   distanceAlongPath: number     // km from start
 }

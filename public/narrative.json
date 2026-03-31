@@ -23,7 +23,7 @@
           "number": 3,
           "name": "Cartography?",
       	  "contents-name": "Cartography",
-          "text": "Capture the spatial aspect of your project in beautiful, clear, information-rich maps. Include the latest remote-sensing datasets including satellite imagery and digital elevation models.. Inform your strategy.",
+          "text": "Capture the spatial aspect of your project in beautiful, clear, information-rich maps. Include the latest remote-sensing datasets including satellite imagery and digital elevation models. Inform your strategy.",
           "image": null
         },
         {
@@ -44,29 +44,33 @@
           "number": 5,
           "name": "Oxford University WildCRU",
       	  "contents-name": "WildCRU",
-          "text": "I built the <a href = 'https://www.wildcru.org/projects/wildmaps-species-distribution-model-dashboard/' target='_blank'>WildMAPS Species Distribution Model dashboard</a>. This owner-updatable catalog of raster data is a research tool for ecologists worldwide. It’s built to display big files (100s of gigabytes) smoothly, with a low hosting cost (pennies per week).",
-          "image": "wildcru.png" 
+          "text": "I built the <a href = ‘https://www.wildcru.org/projects/wildmaps-species-distribution-model-dashboard/’ target=’_blank’>WildMAPS Species Distribution Model dashboard</a>. This owner-updatable catalog of raster data is a research tool for ecologists worldwide. It’s built to display big files (100s of gigabytes) smoothly, with a low hosting cost (pennies per week).",
+          "image": "wildcru.jpg",
+          "gallery_id": "wildcru"
         },
         {
           "number": 6,
           "name": "NHS psychiatrists",
       	  "contents-name": "NHS",
           "text": "I processed more than five million rows of mental-health reporting, for a group of NHS (UK National Health Service) psychiatrists trying to understand how different restraint methods are used. The results and visualisations revealed severe gaps in reporting, and were <a href = 'https://www.cambridge.org/core/journals/bjpsych-bulletin/article/reporting-of-oral-chemical-restraint-in-the-mental-health-services-monthly-statistics-for-england/CF731E113F65A4921ED00BDC76D3F852' target='_blank'>published in BJPsych Bulletin</a>.",
-          "image": "nhs.png"
+          "image": "nhs.jpg",
+          "gallery_id": "nhs"
         },
         {
           "number": 7,
           "name": "Hydrogen explorers",
       	  "contents-name": "H2 explorers",
           "text": "(For confidentiality reasons, no specific details are given.) In a soil-gas survey, I planned survey locations, collected field data, coordinated teams, and plotted results, to determine the prospectivity of a target region.",
-          "image": "hydrogen.png"
+          "image": "hydrogen.jpg",
+          "gallery_id": "hydrogen"
         },
         {
           "number": 8,
           "name": "Oxford University SalGo Team",
       	  "contents-name": "SalGo Team",
           "text": "The SalGo Team were locked in to an expensive subscription for the map on the <a href = 'https://compadre-db.org/' target='_blank'>homepage</a> of their plant and animal database (COMPADRE/COMADRE). In a day's work, I swapped it out for a permanent, free, improved solution, integrating with their existing PHP backend.",
-          "image": "salgo.png"
+          "image": "salgo.jpg",
+          "gallery_id": "salgo"
         }
       ]
     },

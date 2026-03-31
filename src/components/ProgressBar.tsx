@@ -18,10 +18,11 @@ interface Props {
 }
 
 export default function ProgressBar({ items, scrollerRef, inGallery, onNavigate, onOpenChange }: Props) {
-  const [open,       setOpen]       = useState(false)
-  const [scrollTop,  setScrollTop]  = useState(0)
-  const [atBottom,   setAtBottom]   = useState(false)
-  const [galleryPxs, setGalleryPxs] = useState<Record<string, number>>({})
+  const [open,             setOpen]             = useState(false)
+  const [scrollTop,        setScrollTop]        = useState(0)
+  const [atBottom,         setAtBottom]         = useState(false)
+  const [galleryPxs,       setGalleryPxs]       = useState<Record<string, number>>({})
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const el = scrollerRef.current
@@ -71,8 +72,19 @@ export default function ProgressBar({ items, scrollerRef, inGallery, onNavigate,
     sectionHeaders[0]?.id ?? '',
   )
 
-  // Visible items: section headers + gallery items always; subsections only for active section
-  const visibleItems = items.filter(item => !item.parentId || item.parentId === activeSectionId)
+  // Sections that have at least one subsection
+  const sectionsWithSubs = new Set(items.filter(i => i.parentId).map(i => i.parentId!))
+
+  // Auto-expand the active section (and collapse others) when scroll position changes
+  useEffect(() => {
+    if (activeSectionId && sectionsWithSubs.has(activeSectionId)) {
+      setExpandedSections(new Set([activeSectionId]))
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSectionId])
+
+  // Visible items: section headers + gallery items always; subsections only when parent is expanded
+  const visibleItems = items.filter(item => !item.parentId || expandedSections.has(item.parentId))
 
   // Active index within visible items.
   // atBottom only forces last-item when in gallery; during the journey it can
@@ -83,6 +95,11 @@ export default function ProgressBar({ items, scrollerRef, inGallery, onNavigate,
     : visibleItems.reduce((best, item, i) => (ST >= effectivePx(item) ? i : best), 0)
 
   const handleClick = (item: ProgressBarItem) => {
+    // Section with subsections: toggle expand/collapse (at most one open), don't navigate
+    if (!item.parentId && !item.elementId && sectionsWithSubs.has(item.id)) {
+      setExpandedSections(prev => prev.has(item.id) ? new Set() : new Set([item.id]))
+      return
+    }
     const el = scrollerRef.current
     if (!el) return
     let targetPx: number
@@ -99,6 +116,11 @@ export default function ProgressBar({ items, scrollerRef, inGallery, onNavigate,
       targetPx = item.scrollPx
     }
     onNavigate(targetPx)
+    // On mobile: auto-close so the map/info box is restored
+    if (window.innerWidth < 768) {
+      setOpen(false)
+      onOpenChange?.(false)
+    }
   }
 
   return (
@@ -113,12 +135,12 @@ export default function ProgressBar({ items, scrollerRef, inGallery, onNavigate,
       {/* Clickable title strip — toggles open/closed */}
       <div
         className="pb-title-strip"
-        onClick={() => setOpen(o => { const next = !o; onOpenChange?.(next); return next })}
+        onClick={() => { const next = !open; setOpen(next); onOpenChange?.(next) }}
         role="button"
         tabIndex={0}
         aria-expanded={open}
         title={open ? 'Collapse contents' : 'Expand contents'}
-        onKeyDown={(e) => e.key === 'Enter' && setOpen(o => { const next = !o; onOpenChange?.(next); return next })}
+        onKeyDown={(e) => { if (e.key === 'Enter') { const next = !open; setOpen(next); onOpenChange?.(next) } }}
       >
         <span className="pb-title">Contents</span>
         <span className="pb-chevron" aria-hidden="true">{open ? '‹' : '›'}</span>
@@ -147,6 +169,9 @@ export default function ProgressBar({ items, scrollerRef, inGallery, onNavigate,
             >
               <div className="pb-dot" />
               <span className="pb-label">{item.label}</span>
+              {!item.parentId && !item.elementId && sectionsWithSubs.has(item.id) && (
+                <span className={`pb-arrow${expandedSections.has(item.id) ? ' pb-arrow--open' : ''}`} aria-hidden="true">▾</span>
+              )}
             </div>
           )
         })}
