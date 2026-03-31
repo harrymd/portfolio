@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "python3 scripts/preprocess.py",
+    "prebuild": "python3 scripts/preprocess.py && python3 scripts/generate_tile_manifest.py",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

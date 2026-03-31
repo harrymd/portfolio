@@ -10,7 +10,7 @@ Vite + React + TypeScript. MapLibre GL JS renders a WebGL map. PMTiles serves ve
 
 ```bash
 npm run dev       # dev server at localhost:5173
-npm run build     # prebuild (python3 scripts/preprocess.py) then tsc + vite build
+npm run build     # prebuild (preprocess.py + generate_tile_manifest.py) then tsc + vite build
 npm run deploy    # build + push dist/ to gh-pages branch
 ```
 
@@ -30,6 +30,9 @@ npm run deploy    # build + push dist/ to gh-pages branch
 | `public/narrative.json` | Text/images for each POI, keyed by `id` |
 | `public/gallery_content.json` | Gallery cards (title, description, tools, image) |
 | `scripts/preprocess.py` | Generates `public/static_content.html` for SEO crawlers |
+| `scripts/generate_tile_manifest.py` | Generates `public/tile_manifest.json` — z10 tile XYZ list for prefetcher |
+| `public/tile_manifest.json` | Pre-computed tile list (376 tiles, z10, ±1 buffer) — generated at build time |
+| `src/utils/prefetchTiles.ts` | Idle-time tile prefetcher; triggered after map ready |
 
 `narrative.json` and `gallery_content.json` are fetched at runtime (not static imports) because they're loaded alongside the geospatial files in `LoadingScreen.tsx`. They must stay in `public/`.
 
@@ -44,6 +47,8 @@ npm run deploy    # build + push dist/ to gh-pages branch
 **Navigation animation**: `navigateToPoi` runs a rAF loop. `navAnimatingRef` suppresses POI activation during travel. `handleScrollRef` always holds the latest `handleScroll` and is called explicitly at animation end to guarantee POI activation.
 
 **ProgressBar**: section items with subsections toggle expand/collapse (at most one open); clicking navigates only for leaf items. Active section auto-expands on scroll.
+
+**Tile prefetcher**: after `mapReady`, `prefetchTiles()` runs three `requestIdleCallback` queues (one per tile source: terrarium raster, openmaptiles vector, ocean_buffers PMTiles). Each tile is fetched with `priority: 'low'` and yields back to the browser whenever `deadline.timeRemaining() < 4ms`. The tile list is pre-computed at build time (`tile_manifest.json`); the openfreemap URL is fetched live from their TileJSON to handle version changes.
 
 ## Key constants (MapJourney.tsx)
 

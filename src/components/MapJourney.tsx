@@ -8,6 +8,7 @@ import * as turf from '@turf/turf'
 const pmtilesProtocol = new Protocol()
 maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile.bind(pmtilesProtocol))
 
+import { prefetchTiles } from '../utils/prefetchTiles'
 import type { LoadedData, SnappedPoint } from '../types'
 import AttributionWidget from './AttributionWidget'
 import GallerySection from './GallerySection'
@@ -498,6 +499,14 @@ export default function MapJourney({ data }: Props) {
     }, 500)
     return () => clearTimeout(t)
   }, [mapReady]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pre-warm tile caches during browser idle time once the map is visible
+  useEffect(() => {
+    if (!mapReady) return
+    let cancelled = false
+    prefetchTiles(() => cancelled)
+    return () => { cancelled = true }
+  }, [mapReady])
 
   // Initialise map once
   useEffect(() => {
