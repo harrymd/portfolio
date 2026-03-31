@@ -57,6 +57,10 @@
   pointer-events: none !important;
 }
 
+.journey-header--hidden * {
+  pointer-events: none !important;
+}
+
 /* K-as-logo: invisible K reserves layout space; logo overlaid on top */
 .journey-k-wrap {
   position: relative;
