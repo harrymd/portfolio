@@ -27,8 +27,10 @@ function fillTemplate(template: string, z: number, x: number, y: number): string
 }
 
 /**
- * Run a list of async tasks one-at-a-time during browser idle periods.
- * Yields back to the browser whenever timeRemaining drops below 4 ms.
+ * Run a list of async tasks strictly one-at-a-time during browser idle periods.
+ * Awaits each task before scheduling the next idle callback, so at most one
+ * request per source is in-flight at any moment — avoiding connection-pool
+ * contention with the map's own tile fetches.
  */
 function runIdleQueue(
   tasks: (() => Promise<void>)[],
@@ -50,19 +52,21 @@ function runIdleQueue(
       return
     }
 
-    while (i < total && deadline.timeRemaining() > 4) {
+    if (deadline.timeRemaining() > 4 && i < total) {
       const task = tasks[i++]
-      task()  // fire-and-forget — errors already swallowed inside each task
-
-      if (i % logStep === 0 || i === total) {
-        console.log(`${TAG} ${label}: ${i}/${total}`)
-      }
-    }
-
-    if (i < total) {
-      scheduleIdle(step)
+      task().finally(() => {  // await completion before scheduling next
+        if (i % logStep === 0 || i === total) {
+          console.log(`${TAG} ${label}: ${i}/${total}`)
+        }
+        if (i < total) {
+          scheduleIdle(step)
+        } else {
+          onDone()
+        }
+      })
     } else {
-      onDone()
+      // Not enough idle time — try again next idle period without advancing
+      scheduleIdle(step)
     }
   }
 
