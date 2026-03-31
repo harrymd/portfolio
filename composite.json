@@ -18,7 +18,7 @@
     },
     "ocean_buffers": {
       "type": "vector",
-      "url": "pmtiles://https://hrmd-portfolio.s3.eu-west-2.amazonaws.com/norway_buffer_zones.pmtiles"
+      "url": "pmtiles://https://hrmd-portfolio.s3.eu-west-2.amazonaws.com/norway_buffer_zones_z9-10.pmtiles"
     }
   },
   "layers": [
