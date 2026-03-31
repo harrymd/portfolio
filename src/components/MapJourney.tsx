@@ -479,6 +479,7 @@ export default function MapJourney({ data }: Props) {
   // Keep inGalleryRef in sync (used inside passive event handlers)
   useEffect(() => { inGalleryRef.current = inGallery }, [inGallery])
 
+
   // Keep handleScrollRef current so animation-end callbacks can call it
   useEffect(() => { handleScrollRef.current = handleScroll }, [handleScroll])
 
@@ -662,15 +663,25 @@ export default function MapJourney({ data }: Props) {
       touchStartYRef.current = e.touches[0].clientY
     }
 
-    // Block wheel/touch scroll in journey mode; also block upward scroll at gallery entry
+    // Block wheel/touch scroll in journey mode; also block upward scroll at gallery entry.
+    // When in journey mode but near the gallery threshold, allow downward scroll so the
+    // user can recover if they accidentally crossed the boundary.
     const blockScroll = (e: Event) => {
+      const scr = scrollerRef.current
       if (!inGalleryRef.current) {
+        // Allow downward scroll near gallery entry for recovery
+        if (e.type === 'wheel') {
+          const we = e as WheelEvent
+          if (we.deltaY > 0 && scr && scr.scrollTop >= galleryThresholdRef.current - 300) return
+        } else if (e.type === 'touchmove') {
+          const currentY = (e as TouchEvent).touches[0].clientY
+          if (currentY < touchStartYRef.current && scr && scr.scrollTop >= galleryThresholdRef.current - 300) return
+        }
         e.preventDefault()
         return
       }
-      // Prevent scrolling back up into the journey section
-      const scr = scrollerRef.current
-      if (scr && scr.scrollTop <= galleryThresholdRef.current + 5) {
+      // Gallery mode: block upward scroll that would re-enter the journey section
+      if (scr && scr.scrollTop <= galleryThresholdRef.current + 150) {
         if (e.type === 'wheel' && (e as WheelEvent).deltaY < 0) {
           e.preventDefault()
         } else if (e.type === 'touchmove' &&

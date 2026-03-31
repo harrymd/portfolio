@@ -142,7 +142,17 @@
   pointer-events: none;
   transition:
     opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    transform 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    left 0.25s ease;
+}
+
+/* Shift panel right on desktop when contents pane is open;
+   constrain width so panel fits with small margins either side */
+@media (min-width: 768px) {
+  .journey-root--pb-open .poi-panel {
+    left: calc(50% + 8rem);
+    max-width: calc(100vw - 18rem);
+  }
 }
 
 .poi-panel--visible {
@@ -490,7 +500,7 @@
 /* ── Wide two-column panel (desktop only, when image present) ─ */
 @media (min-width: 768px) {
   .poi-panel--wide {
-    width: min(920px, calc(100vw - 4rem));
+    width: min(920px, calc(100vw - 7rem));
   }
 
   .poi-panel-cols {
