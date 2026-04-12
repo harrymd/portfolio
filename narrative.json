@@ -44,7 +44,7 @@
           "number": 5,
           "name": "Oxford University WildCRU",
       	  "contents-name": "WildCRU",
-          "text": "I built the <a href = ‘https://www.wildcru.org/projects/wildmaps-species-distribution-model-dashboard/’ target=’_blank’>WildMAPS Species Distribution Model dashboard</a>. This owner-updatable catalog of raster data is a research tool for ecologists worldwide. It’s built to display big files (100s of gigabytes) smoothly, with a low hosting cost (pennies per week).",
+          "text": "I built the <a href=\"https://www.wildcru.org/projects/wildmaps-species-distribution-model-dashboard/\" target=’_blank’>WildMAPS Species Distribution Model dashboard</a>. This owner-updatable catalog of raster data is a research tool for ecologists worldwide. It’s built to display big files (100s of gigabytes) smoothly, with a low hosting cost (pennies per week).",
           "image": "wildcru.jpg",
           "gallery_id": "wildcru"
         },
